@@ -1,0 +1,7 @@
+[requires]
+boost/1.69.0@conan/stable
+gdal/3.0.2@local/stable
+opencv/4.1.1@conan/stable
+libtiff/4.0.10@local/stable
+libjpeg/9c@bincrafters/stable
+openjpeg/2.3.1@local/stable
