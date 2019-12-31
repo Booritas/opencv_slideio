@@ -1,4 +1,9 @@
-#pragma once
+// This file is part of OpenCV project.
+// It is subject to the license terms in the LICENSE file found in the top-level directory
+// of this distribution and at http://opencv.org/license.html.
+#ifndef OPENCV_slideio_memory_stream_HPP
+#define OPENCV_slideio_memory_stream_HPP
+
 #include "openjpeg.h"
 
 namespace cv
@@ -15,3 +20,4 @@ namespace cv
         opj_stream_t* createOPJMemoryStream(OPJStreamUserData* data, size_t size, bool inputStream);
     }
 }
+#endif
