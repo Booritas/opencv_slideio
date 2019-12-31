@@ -12,17 +12,17 @@ namespace cv
         {
         public:
             virtual ~Scene() = default;
-            virtual std::string getScenePath() const = 0;
-            virtual cv::Rect getSceneRect() const = 0;
-            virtual int getNumChannels() const = 0;
+            CV_WRAP virtual std::string getScenePath() const = 0;
+            CV_WRAP virtual cv::Rect getSceneRect() const = 0;
+            CV_WRAP virtual int getNumChannels() const = 0;
             virtual DataType getChannelDataType(int channel) const = 0;
-            virtual Resolution  getResolution() const = 0;
-            virtual double getMagnification() const = 0;
-            virtual void readBlock(const cv::Rect& blockRect, cv::OutputArray output);
-            virtual void readBlock(const cv::Rect& blockRect, const std::vector<int>& channelIndices, cv::OutputArray output);
-            virtual void readBlock(const cv::Rect& blockRect, const cv::Size& blockSize, cv::OutputArray output);
-            virtual void readBlock(const cv::Rect& blockRect, const cv::Size& blockSize, const std::vector<int>& channelIndices, cv::OutputArray output) = 0;
-            virtual std::string getName() const = 0;
+            CV_WRAP virtual Resolution  getResolution() const = 0;
+            CV_WRAP virtual double getMagnification() const = 0;
+            CV_WRAP virtual void readBlock(const cv::Rect& blockRect, cv::OutputArray output);
+            CV_WRAP virtual void readBlock(const cv::Rect& blockRect, const std::vector<int>& channelIndices, cv::OutputArray output);
+            CV_WRAP virtual void readBlock(const cv::Rect& blockRect, const cv::Size& blockSize, cv::OutputArray output);
+            CV_WRAP virtual void readBlock(const cv::Rect& blockRect, const cv::Size& blockSize, const std::vector<int>& channelIndices, cv::OutputArray output) = 0;
+            CV_WRAP virtual std::string getName() const = 0;
         };
 
     }

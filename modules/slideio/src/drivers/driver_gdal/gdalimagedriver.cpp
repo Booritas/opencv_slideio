@@ -42,10 +42,10 @@ bool slideio::GDALImageDriver::canOpenFile(const std::string& filePath) const
 	return found;
 }
 
-std::shared_ptr<slideio::Slide> slideio::GDALImageDriver::openFile(const std::string& filePath)
+cv::Ptr<slideio::Slide> slideio::GDALImageDriver::openFile(const std::string& filePath)
 {
 	GDALDatasetH ds = GDALScene::openFile(filePath);
 	slideio::Slide* slide = new GDALSlide(ds, filePath);
-	std::shared_ptr<slideio::Slide> ptr(slide);
+	cv::Ptr<slideio::Slide> ptr(slide);
 	return ptr;
 }

@@ -31,7 +31,7 @@ namespace cv
             TIFFDataType dataType;
             int stripSize;
         };
-        class CV_EXPORTS_W TiffTools
+        class CV_EXPORTS  TiffTools
         {
         public:
             static void scanTiffDirTags(TIFF* tiff, slideio::TiffDirectory& dir);

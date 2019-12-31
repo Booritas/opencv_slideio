@@ -1,15 +1,14 @@
 #pragma once
 #include "opencv2/slideio/slide.hpp"
 #include <string>
-#include <memory>
-#include <list>
+#include <vector>
 
 namespace cv
 {
     namespace  slideio
     {
-        std::shared_ptr<Slide> openSlide(const std::string& path, const std::string& driver);
-        std::list<std::string> getDrivers();
+        CV_EXPORTS_W cv::Ptr<Slide> openSlide(const cv::String& path, const cv::String& driver);
+        CV_EXPORTS_W std::vector<cv::String> getDrivers();
         inline DataType fromOpencvType(int type)
         {
             return static_cast<DataType>(type);

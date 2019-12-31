@@ -33,7 +33,7 @@ bool slideio::SVSImageDriver::canOpenFile(const std::string& filePath) const
 	return found;
 }
 
-std::shared_ptr<slideio::Slide> slideio::SVSImageDriver::openFile(const std::string& filePath)
+cv::Ptr<slideio::Slide> slideio::SVSImageDriver::openFile(const std::string& filePath)
 {
 	return SVSSlide::openFile(filePath);
 }

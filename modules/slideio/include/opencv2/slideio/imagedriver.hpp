@@ -6,12 +6,12 @@ namespace cv
 {
     namespace slideio
     {
-        class ImageDriver
+        class CV_EXPORTS ImageDriver
         {
         public:
             virtual std::string getID() const = 0;
             virtual bool canOpenFile(const std::string& filePath) const = 0;
-            virtual std::shared_ptr<Slide> openFile(const std::string& filePath) = 0;
+            virtual cv::Ptr<Slide> openFile(const std::string& filePath) = 0;
         };
     }
 }

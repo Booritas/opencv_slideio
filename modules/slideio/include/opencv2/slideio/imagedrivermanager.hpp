@@ -9,20 +9,20 @@ namespace cv
     namespace slideio
     {
         class ImageDriver;
-        class CV_EXPORTS_W ImageDriverManager
+        class CV_EXPORTS ImageDriverManager
         {
         protected:
             ImageDriverManager();
             ~ImageDriverManager();
         public:
-            static std::list<std::string> getDriverIDs();
+            static std::vector<std::string> getDriverIDs();
             static ImageDriver* getDriver(const std::string& driverName);
             static ImageDriver* findDriver(const std::string& filePath);
-            static std::shared_ptr<Slide> openSlide(const std::string& cs, const std::string& driver);
+            static cv::Ptr<Slide> openSlide(const std::string& cs, const std::string& driver);
         protected:
             static void initialize();
         private:
-            static std::map<std::string, std::shared_ptr<ImageDriver>> driverMap;
+            static std::map<std::string, cv::Ptr<ImageDriver>> driverMap;
         };
     }
 }

@@ -10,7 +10,7 @@ namespace cv
 {
     namespace slideio
     {
-        class CV_EXPORTS_W GDALScene : public slideio::Scene
+        class CV_EXPORTS GDALScene : public slideio::Scene
         {
         public:
             GDALScene(const std::string& filePath);

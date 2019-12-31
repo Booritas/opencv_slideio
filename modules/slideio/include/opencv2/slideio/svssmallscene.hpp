@@ -6,7 +6,7 @@ namespace cv
 {
     namespace slideio
     {
-        class CV_EXPORTS_W SVSSmallScene : public SVSScene
+        class CV_EXPORTS SVSSmallScene : public SVSScene
         {
         public:
             SVSSmallScene(

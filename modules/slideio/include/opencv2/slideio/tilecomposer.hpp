@@ -12,7 +12,7 @@ namespace cv
             virtual bool getTileRect(int tileIndex, cv::Rect& tileRect, void* userData) = 0;
             virtual bool readTile(int tileIndex, const std::vector<int>& channelIndices, cv::OutputArray tileRaster, void* userData) = 0;
         };
-        class CV_EXPORTS_W TileComposer
+        class CV_EXPORTS TileComposer
         {
         public:
             static void composeRect(Tiler* tiler, const std::vector<int>& channelIndices,

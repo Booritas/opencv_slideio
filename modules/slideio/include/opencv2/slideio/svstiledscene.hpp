@@ -7,7 +7,7 @@ namespace cv
 {
     namespace slideio
     {
-        class CV_EXPORTS_W SVSTiledScene : public SVSScene, public Tiler
+        class CV_EXPORTS SVSTiledScene : public SVSScene, public Tiler
         {
         public:
             SVSTiledScene(const std::string& filePath,

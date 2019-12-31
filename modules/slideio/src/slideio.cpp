@@ -7,13 +7,12 @@
 
 using namespace cv::slideio;
 
-std::shared_ptr<Slide> openSlide(const std::string& filePath, const std::string& driver)
+cv::Ptr<Slide> cv::slideio::openSlide(const cv::String& filePath, const cv::String& driver)
 {
-	return ImageDriverManager::openSlide(filePath, driver);
+    return ImageDriverManager::openSlide(filePath, driver);
 }
 
-std::list<std::string> getDrivers()
+std::vector<cv::String> cv::slideio::getDrivers()
 {
-	std::list<std::string> drivers = ImageDriverManager::getDriverIDs();
-	return drivers;
+    return ImageDriverManager::getDriverIDs();
 }

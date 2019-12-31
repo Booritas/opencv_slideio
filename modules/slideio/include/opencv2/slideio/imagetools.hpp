@@ -11,7 +11,7 @@ namespace cv
 {
     namespace slideio
     {
-        class CV_EXPORTS_W ImageTools
+        class CV_EXPORTS ImageTools
         {
         public:
             static int dataTypeSize(slideio::DataType dt);

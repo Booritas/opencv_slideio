@@ -2,7 +2,7 @@
 #include "opencv2/slideio/gdalimagedriver.hpp"
 
 using namespace cv::slideio;
-std::map<std::string, std::shared_ptr<ImageDriver>> ImageDriverManager::driverMap;
+std::map<std::string, cv::Ptr<ImageDriver>> ImageDriverManager::driverMap;
 
 
 ImageDriverManager::ImageDriverManager()
@@ -13,10 +13,10 @@ ImageDriverManager::~ImageDriverManager()
 {
 }
 
-std::list<std::string> ImageDriverManager::getDriverIDs()
+std::vector<std::string> ImageDriverManager::getDriverIDs()
 {
 	initialize();
-	std::list<std::string> ids;
+	std::vector<std::string> ids;
 	for(const auto drv : driverMap){
 		ids.push_back(drv.first);
 	}
@@ -28,16 +28,16 @@ void ImageDriverManager::initialize()
 	if(driverMap.empty())
 	{
 		GDALImageDriver* driver = new GDALImageDriver;
-		std::shared_ptr<ImageDriver> gdal(driver);
+		cv::Ptr<ImageDriver> gdal(driver);
 		driverMap[gdal->getID()] = gdal;
 	}
 }
 
-std::shared_ptr<Slide> ImageDriverManager::openSlide(const std::string& filePath, const std::string& driverName)
+cv::Ptr<Slide> ImageDriverManager::openSlide(const std::string& filePath, const std::string& driverName)
 {
 	auto it = driverMap.find(driverName);
 	if(it==driverMap.end())
 		throw std::runtime_error("ImageDriverManager: Unknown driver " + driverName);
-	std::shared_ptr<slideio::ImageDriver> driver = it->second;
+	cv::Ptr<slideio::ImageDriver> driver = it->second;
 	return driver->openFile(filePath);
 }

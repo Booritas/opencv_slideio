@@ -7,7 +7,7 @@ namespace cv
 {
     namespace slideio
     {
-        class CV_EXPORTS_W SVSSlide : public slideio::Slide
+        class CV_EXPORTS SVSSlide : public slideio::Slide
         {
         protected:
             SVSSlide();
@@ -15,11 +15,11 @@ namespace cv
             virtual ~SVSSlide();
             int getNumbScenes() const override;
             std::string getFilePath() const override;
-            std::shared_ptr<slideio::Scene> getScene(int index) const override;
-            static std::shared_ptr<SVSSlide> openFile(const std::string& path);
+            cv::Ptr<slideio::Scene> getScene(int index) const override;
+            static cv::Ptr<SVSSlide> openFile(const std::string& path);
             static void closeFile(TIFF* hfile);
         private:
-            std::vector<std::shared_ptr<slideio::Scene>> m_Scenes;
+            std::vector<cv::Ptr<slideio::Scene>> m_Scenes;
             std::string m_filePath;
         };
     }

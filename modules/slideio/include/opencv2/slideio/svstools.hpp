@@ -6,7 +6,7 @@ namespace cv
 {
     namespace slideio
     {
-        class CV_EXPORTS_W SVSTools
+        class CV_EXPORTS SVSTools
         {
         public:
             static int extractMagnifiation(const std::string& description);

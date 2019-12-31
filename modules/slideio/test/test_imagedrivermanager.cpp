@@ -1,11 +1,19 @@
 #include "test_precomp.hpp"
 #include "opencv2/slideio/imagedrivermanager.hpp"
+#include "opencv2/slideio.hpp"
 
 namespace opencv_test {
 
 TEST(ImageDriverManagerTest, getDriverIDs)
 {
-    std::list<std::string> driverIDs = slideio::ImageDriverManager::getDriverIDs();
+    std::vector<std::string> driverIDs = slideio::ImageDriverManager::getDriverIDs();
     EXPECT_FALSE(driverIDs.empty());
 }
+
+TEST(ImageDriverManagerTest, getDriversGlobal)
+{
+    auto drivers = slideio::getDrivers();
+    EXPECT_FALSE(drivers.empty());
+}
+
 }

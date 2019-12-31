@@ -27,7 +27,7 @@ std::string slideio::GDALSlide::getFilePath() const
 	return empty_path;
 }
 
-std::shared_ptr<slideio::Scene> slideio::GDALSlide::getScene(int index) const
+cv::Ptr<slideio::Scene> slideio::GDALSlide::getScene(int index) const
 {
 	if(index>=getNumbScenes())
 		throw std::runtime_error("GDAL driver: invalide m_scene index");
