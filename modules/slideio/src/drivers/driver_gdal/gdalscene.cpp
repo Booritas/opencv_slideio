@@ -124,7 +124,7 @@ cv::Rect slideio::GDALScene::getSceneRect() const
     return rect;
 }
 
-void slideio::GDALScene::readBlock(const cv::Rect& blockRect, const cv::Size& blockSize, const std::vector<int>& channelIndices_, cv::OutputArray output)
+void slideio::GDALScene::readResampledBlockChannels(const cv::Rect& blockRect, const cv::Size& blockSize, const std::vector<int>& channelIndices_, cv::OutputArray output)
 {
     if(m_hFile==nullptr)
         throw std::runtime_error("GDALDriver: Invalid file header by raster reading operation");

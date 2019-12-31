@@ -138,7 +138,7 @@ TEST(SVSImageDriver, read_Thumbnail_BlockWithScale)
     cv::Size blockSize = { (int)(sceneRect.width * scale), (int)(sceneRect.height * scale) };
 
     cv::Mat blockRaster;
-    scene->readBlock(blockRect, blockSize, blockRaster);
+    scene->readResampledBlock(blockRect, blockSize, blockRaster);
     ASSERT_EQ(blockRaster.cols, blockSize.width);
     ASSERT_EQ(blockRaster.rows, blockSize.height);
 
@@ -266,7 +266,7 @@ TEST(SVSImageDriver, readBlock_PartScale)
     cv::Rect blockRect = { sceneRect.width / 2, sceneRect.height / 2, 300, 300 };
     cv::Size blockSize = blockRect.size();
     blockSize /= 2;
-    scene->readBlock(blockRect, blockSize, blockRaster);
+    scene->readResampledBlock(blockRect, blockSize, blockRaster);
 
     // read extracted page by GDAL library
     std::string pathPageFile = TestTools::getTestImagePath("svs", "CMU-1-Small-Region-page-0.tif");
@@ -281,4 +281,23 @@ TEST(SVSImageDriver, readBlock_PartScale)
     cv::minMaxLoc(score, &minScore, &maxScore);
     ASSERT_LT(0.98, minScore);
 }
+TEST(SVSImageDriver, composeRect2)
+{
+    slideio::SVSImageDriver driver;
+    std::string path = TestTools::getTestImagePath("svs", "JP2K-33003-1.svs");
+    std::shared_ptr<slideio::Slide> slide = driver.openFile(path);
+    ASSERT_TRUE(slide != nullptr);
+    int numbScenes = slide->getNumbScenes();
+    ASSERT_TRUE(numbScenes == 4);
+    std::shared_ptr<slideio::Scene> scene = slide->getScene(0);
+    ASSERT_TRUE(scene != nullptr);
+    const cv::Rect sceneRect = scene->getSceneRect();
+    cv::Mat blockRaster;
+    cv::Size blockSize = { sceneRect.width /3, sceneRect.height / 3};
+    cv::Mat image;
+    scene->readResampledBlock(sceneRect, blockSize, image);
+
+    cv::imwrite(R"(d:\Temp\a.bmp)", image);
+}
+
 }

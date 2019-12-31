@@ -150,7 +150,7 @@ TEST(GDALDriverTest, readBlockPng)
 
     cv::Mat channelRaster;
     std::vector<int> channelIndices = { 1 };
-    scene->readBlock(block, channelIndices, channelRaster);
+    scene->readBlockChannels(block, channelIndices, channelRaster);
 
     cv::Scalar channelMean, channelStddev;
     cv::meanStdDev(channelRaster, channelMean, channelStddev);
@@ -177,7 +177,7 @@ TEST(GDALDriverTest, readBlockPngResampling)
     cv::Rect blockRect = {260,500, 100,100};
     cv::Size blockSize = {12,12};
     cv::Mat blockRaster;
-    scene->readBlock(blockRect, blockSize, blockRaster);
+    scene->readResampledBlock(blockRect, blockSize, blockRaster);
     cv::Scalar colorMean, colorStddev;
     cv::meanStdDev(blockRaster, colorMean, colorStddev);
     EXPECT_EQ(colorMean[0], 255);

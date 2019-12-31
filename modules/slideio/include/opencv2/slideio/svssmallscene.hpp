@@ -19,7 +19,7 @@ namespace cv
             slideio::DataType getChannelDataType(int channel) const override;
             slideio::Resolution getResolution() const override;
             double getMagnification() const override;
-            void readBlock(const cv::Rect& blockRect, const cv::Size& blockSize, const std::vector<int>& channelIndices,
+            void readResampledBlockChannels(const cv::Rect& blockRect, const cv::Size& blockSize, const std::vector<int>& channelIndices,
                 cv::OutputArray output) override;
         private:
             slideio::TiffDirectory m_directory;

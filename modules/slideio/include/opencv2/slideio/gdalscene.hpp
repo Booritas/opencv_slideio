@@ -26,7 +26,7 @@ namespace cv
             static slideio::DataType dataTypeFromGDALDataType(GDALDataType dt);
             std::string getName() const override;
             cv::Rect getSceneRect() const override;
-            void readBlock(const cv::Rect& blockRect, const cv::Size& blockSize, const std::vector<int>& channelIndices, cv::OutputArray output) override;
+            void readResampledBlockChannels(const cv::Rect& blockRect, const cv::Size& blockSize, const std::vector<int>& channelIndices, cv::OutputArray output) override;
         private:
             GDALDatasetH m_hFile;
             std::string m_filePath;

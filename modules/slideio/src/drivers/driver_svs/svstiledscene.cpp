@@ -64,7 +64,7 @@ double SVSTiledScene::getMagnification() const
     return m_magnification;
 }
 
-void SVSTiledScene::readBlock(const cv::Rect& blockRect, const cv::Size& blockSize,
+void SVSTiledScene::readResampledBlockChannels(const cv::Rect& blockRect, const cv::Size& blockSize,
     const std::vector<int>& channelIndices, cv::OutputArray output)
 {
     if (m_hFile == nullptr)

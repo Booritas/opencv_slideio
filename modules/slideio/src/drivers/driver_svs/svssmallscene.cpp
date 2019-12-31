@@ -67,7 +67,7 @@ double SVSSmallScene::getMagnification() const
 }
 
 
-void SVSSmallScene::readBlock(const cv::Rect& blockRect, const cv::Size& blockSize,
+void SVSSmallScene::readResampledBlockChannels(const cv::Rect& blockRect, const cv::Size& blockSize,
     const std::vector<int>& channelIndices, cv::OutputArray output)
 {
     if (m_hFile == nullptr)

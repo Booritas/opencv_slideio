@@ -19,7 +19,7 @@ namespace cv
             slideio::Resolution getResolution() const override;
             double getMagnification() const override;
             cv::Rect getSceneRect() const override;
-            void readBlock(const cv::Rect& blockRect, const cv::Size& blockSize, const std::vector<int>& channelIndices,
+            void readResampledBlockChannels(const cv::Rect& blockRect, const cv::Size& blockSize, const std::vector<int>& channelIndices,
                 cv::OutputArray output) override;
             const slideio::TiffDirectory& findZoomDirectory(double zoom) const;
             // Tiler methods

@@ -19,9 +19,9 @@ namespace cv
             CV_WRAP virtual Resolution  getResolution() const = 0;
             CV_WRAP virtual double getMagnification() const = 0;
             CV_WRAP virtual void readBlock(const cv::Rect& blockRect, cv::OutputArray output);
-            CV_WRAP virtual void readBlock(const cv::Rect& blockRect, const std::vector<int>& channelIndices, cv::OutputArray output);
-            CV_WRAP virtual void readBlock(const cv::Rect& blockRect, const cv::Size& blockSize, cv::OutputArray output);
-            CV_WRAP virtual void readBlock(const cv::Rect& blockRect, const cv::Size& blockSize, const std::vector<int>& channelIndices, cv::OutputArray output) = 0;
+            CV_WRAP virtual void readBlockChannels(const cv::Rect& blockRect, const std::vector<int>& channelIndices, cv::OutputArray output);
+            CV_WRAP virtual void readResampledBlock(const cv::Rect& blockRect, const cv::Size& blockSize, cv::OutputArray output);
+            CV_WRAP virtual void readResampledBlockChannels(const cv::Rect& blockRect, const cv::Size& blockSize, const std::vector<int>& channelIndices, cv::OutputArray output) = 0;
             CV_WRAP virtual std::string getName() const = 0;
         };
 
