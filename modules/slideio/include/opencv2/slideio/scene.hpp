@@ -15,7 +15,7 @@ namespace cv
             CV_WRAP virtual std::string getScenePath() const = 0;
             CV_WRAP virtual cv::Rect getSceneRect() const = 0;
             CV_WRAP virtual int getNumChannels() const = 0;
-            virtual DataType getChannelDataType(int channel) const = 0;
+            CV_WRAP virtual cv::slideio::DataType getChannelDataType(int channel) const = 0;
             CV_WRAP virtual Resolution  getResolution() const = 0;
             CV_WRAP virtual double getMagnification() const = 0;
             CV_WRAP virtual void readBlock(const cv::Rect& blockRect, cv::OutputArray output);

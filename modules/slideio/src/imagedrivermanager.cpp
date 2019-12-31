@@ -1,5 +1,6 @@
 ﻿#include "opencv2/slideio/imagedrivermanager.hpp"
 #include "opencv2/slideio/gdalimagedriver.hpp"
+#include "opencv2/slideio/svsimagedriver.hpp"
 
 using namespace cv::slideio;
 std::map<std::string, cv::Ptr<ImageDriver>> ImageDriverManager::driverMap;
@@ -15,29 +16,36 @@ ImageDriverManager::~ImageDriverManager()
 
 std::vector<std::string> ImageDriverManager::getDriverIDs()
 {
-	initialize();
-	std::vector<std::string> ids;
-	for(const auto drv : driverMap){
-		ids.push_back(drv.first);
-	}
-	return ids;
+    initialize();
+    std::vector<std::string> ids;
+    for(const auto drv : driverMap){
+        ids.push_back(drv.first);
+    }
+    return ids;
 }
 
 void ImageDriverManager::initialize()
 {
-	if(driverMap.empty())
-	{
-		GDALImageDriver* driver = new GDALImageDriver;
-		cv::Ptr<ImageDriver> gdal(driver);
-		driverMap[gdal->getID()] = gdal;
-	}
+    if(driverMap.empty())
+    {
+        {
+            GDALImageDriver* driver = new GDALImageDriver;
+            cv::Ptr<ImageDriver> gdal(driver);
+            driverMap[gdal->getID()] = gdal;
+        }
+        {
+            SVSImageDriver* driver = new SVSImageDriver;
+            cv::Ptr<ImageDriver> svs(driver);
+            driverMap[svs->getID()] = svs;
+        }
+    }
 }
 
 cv::Ptr<Slide> ImageDriverManager::openSlide(const std::string& filePath, const std::string& driverName)
 {
-	auto it = driverMap.find(driverName);
-	if(it==driverMap.end())
-		throw std::runtime_error("ImageDriverManager: Unknown driver " + driverName);
-	cv::Ptr<slideio::ImageDriver> driver = it->second;
-	return driver->openFile(filePath);
+    auto it = driverMap.find(driverName);
+    if(it==driverMap.end())
+        throw std::runtime_error("ImageDriverManager: Unknown driver " + driverName);
+    cv::Ptr<slideio::ImageDriver> driver = it->second;
+    return driver->openFile(filePath);
 }
