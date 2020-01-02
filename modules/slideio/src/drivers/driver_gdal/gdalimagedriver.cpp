@@ -29,21 +29,6 @@ std::string slideio::GDALImageDriver::getID() const
 	return std::string("GDAL");
 }
 
-bool slideio::GDALImageDriver::canOpenFile(const std::string& filePath) const
-{
-	namespace fs = boost::filesystem;
-	namespace alg = boost::algorithm;
-	
-	static std::set<std::string> extensions {".png", ".jpeg", ".jpg",
-		".tif", ".tiff", ".bmp", ".gif", ".gtiff", ".gtif", ".ntif",
-		".jp2"};
-	 
-	fs::path path(filePath);
-	std::string ext_str = path.extension().string();
-	alg::to_lower(ext_str);
-	const bool found = extensions.find(ext_str)!=extensions.end();
-	return found;
-}
 
 cv::Ptr<slideio::Slide> slideio::GDALImageDriver::openFile(const std::string& filePath)
 {
@@ -51,4 +36,10 @@ cv::Ptr<slideio::Slide> slideio::GDALImageDriver::openFile(const std::string& fi
 	slideio::Slide* slide = new GDALSlide(ds, filePath);
 	cv::Ptr<slideio::Slide> ptr(slide);
 	return ptr;
+}
+
+std::string slideio::GDALImageDriver::getFileSpecs() const
+{
+	static std::string pattern("*.png;*.jpeg;*.jpg;*.tif;*.tiff;*.bmp;*.gif;*.gtiff;*.gtif;*.ntif;*.jp2");
+    return pattern;
 }

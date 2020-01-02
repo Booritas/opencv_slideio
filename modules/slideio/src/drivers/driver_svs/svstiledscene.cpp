@@ -76,7 +76,7 @@ void SVSTiledScene::readResampledBlockChannels(const cv::Rect& blockRect, const 
     double zoomY = static_cast<double>(blockSize.height) / static_cast<double>(blockRect.height);
     double zoom = std::max(zoomX, zoomY);
     const slideio::TiffDirectory& dir = findZoomDirectory(zoom);
-    double zoomDirX = static_cast<double>(dir.width) / static_cast<double>(m_directories[0].width);
+    double zoomDirX = static_cast<double>(dir.width) / static_cast<double>(m_directories[0].width); 
     double zoomDirY = static_cast<double>(dir.height) / static_cast<double>(m_directories[0].height);
     cv::Rect resizedBlock;
     ImageTools::scaleRect(blockRect, zoomDirX, zoomDirY, resizedBlock);

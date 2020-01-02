@@ -1,2 +1,5 @@
 set(the_description "Medical images I/O")
 ocv_define_module(slideio opencv_core opencv_imgproc WRAP python)
+IF(WIN32)
+	ocv_target_link_libraries(${the_module} LINK_PRIVATE Shlwapi)
+ENDIF(WIN32)

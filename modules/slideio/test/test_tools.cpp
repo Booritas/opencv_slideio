@@ -1,24 +1,18 @@
+// This file is part of OpenCV project.
+// It is subject to the license terms in the LICENSE file found in the top-level directory
+// of this distribution and at http://opencv.org/license.html.
 #include "test_precomp.hpp"
-#include "testtools.hpp"
-#include <boost/dll/runtime_symbol_info.hpp>
-#include "opencv2/ts.hpp"
+#include "opencv2/slideio/tools.hpp"
 
 namespace opencv_test {
 
-std::string TestTools::getTestImageDirectory()
+TEST(Slideio_Tools, matchPattern)
 {
-    boost::filesystem::path testDirPath = cvtest::TS::ptr()->get_data_path();
-    testDirPath /= "slideio";
-    return testDirPath.string();
-}
-
-std::string TestTools::getTestImagePath(const std::string& subfolder, const std::string& image)
-{
-    boost::filesystem::path imagePath(getTestImageDirectory());
-    if(!subfolder.empty())
-        imagePath /= subfolder;
-    imagePath /= image;
-    return imagePath.string();
+    EXPECT_TRUE(cv::slideio::Tools::matchPattern("c:\\abs.ad.czi","*.czi"));
+    EXPECT_TRUE(cv::slideio::Tools::matchPattern("c:\\abs.ad.czi","*.tiff;*.czi"));
+    EXPECT_FALSE(cv::slideio::Tools::matchPattern("c:\\abs.ad.czi","*.tiff;*.aczi"));
+    EXPECT_TRUE(cv::slideio::Tools::matchPattern("c:\\abs.ad.OME.TIFF","*.tiff;*.aczi;*.ome.tiff"));
+    EXPECT_TRUE(cv::slideio::Tools::matchPattern("c:\\abs\\SLIDEIO123.OME.TIFF","*.tiff;*.aczi;slideio*.ome.tiff"));
 }
 
 }

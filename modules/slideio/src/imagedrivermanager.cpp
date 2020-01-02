@@ -4,6 +4,7 @@
 #include "opencv2/slideio/imagedrivermanager.hpp"
 #include "opencv2/slideio/gdalimagedriver.hpp"
 #include "opencv2/slideio/svsimagedriver.hpp"
+#include "opencv2/slideio/cziimagedriver.hpp"
 
 using namespace cv::slideio;
 std::map<std::string, cv::Ptr<ImageDriver>> ImageDriverManager::driverMap;
@@ -40,6 +41,10 @@ void ImageDriverManager::initialize()
             SVSImageDriver* driver = new SVSImageDriver;
             cv::Ptr<ImageDriver> svs(driver);
             driverMap[svs->getID()] = svs;
+        }
+        {
+            cv::Ptr<ImageDriver> driver(new CZIImageDriver);
+            driverMap[driver->getID()] = driver;
         }
     }
 }

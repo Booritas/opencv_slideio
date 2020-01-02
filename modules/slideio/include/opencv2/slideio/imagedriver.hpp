@@ -15,8 +15,9 @@ namespace cv
         {
         public:
             virtual std::string getID() const = 0;
-            virtual bool canOpenFile(const std::string& filePath) const = 0;
+            virtual bool canOpenFile(const std::string& filePath) const;
             virtual cv::Ptr<Slide> openFile(const std::string& filePath) = 0;
+            virtual std::string getFileSpecs() const = 0;
         };
     }
 }

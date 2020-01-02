@@ -288,10 +288,24 @@ void slideio::ImageTools::readGDALImage(const std::string& filePath, cv::OutputA
     }
 }
 
+void slideio::ImageTools::scaleRect(const cv::Rect& srcRect, const cv::Size& newSize, cv::Rect& trgRect)
+{
+    double scaleX = static_cast<double>(newSize.width) / static_cast<double>(srcRect.width);
+    double scaleY = static_cast<double>(newSize.height) / static_cast<double>(srcRect.height);
+    trgRect.x = static_cast<int>(std::floor(static_cast<double>(srcRect.x)*scaleX));
+    trgRect.y = static_cast<int>(std::floor(static_cast<double>(srcRect.y)*scaleY));
+    trgRect.width = newSize.width;
+    trgRect.height = newSize.height;
+}
+
 void slideio::ImageTools::scaleRect(const cv::Rect& srcRect, double scaleX, double scaleY, cv::Rect& trgRect)
 {
-    trgRect.x = static_cast<int>(std::lround(static_cast<double>(srcRect.x)* scaleX));
-    trgRect.y = static_cast<int>(std::lround(static_cast<double>(srcRect.y)* scaleY));
-    trgRect.width = static_cast<int>(std::lround(static_cast<double>(srcRect.width)* scaleX));
-    trgRect.height = static_cast<int>(std::lround(static_cast<double>(srcRect.height)* scaleY));
+    trgRect.x = static_cast<int>(std::floor(static_cast<double>(srcRect.x)*scaleX));
+    trgRect.y = static_cast<int>(std::floor(static_cast<double>(srcRect.y)*scaleY));
+    int xn = srcRect.x + srcRect.width;
+    int yn = srcRect.y + srcRect.height;
+    int dxn = static_cast<int>(std::ceil(static_cast<double>(xn)* scaleX));
+    int dyn = static_cast<int>(std::ceil(static_cast<double>(yn)* scaleY));
+    trgRect.width = dxn - trgRect.x;
+    trgRect.height = dyn - trgRect.y;
 }

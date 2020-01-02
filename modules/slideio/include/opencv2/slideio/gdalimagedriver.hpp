@@ -16,8 +16,8 @@ namespace cv
             GDALImageDriver();
             ~GDALImageDriver();
             std::string getID() const override;
-            bool canOpenFile(const std::string& filePath) const override;
             cv::Ptr<Slide> openFile(const std::string& filePath) override;
+            std::string getFileSpecs() const override;
         };
     }
 }

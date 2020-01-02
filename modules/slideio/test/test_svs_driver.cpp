@@ -208,6 +208,10 @@ TEST(SVSImageDriver, readBlock_WholeImage)
     cv::Mat sceneRaster;
     scene->readBlock(sceneRect, sceneRaster);
 
+    //namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
+    //imshow( "Display window", sceneRaster );                   // Show our image inside it.
+    //waitKey(0);
+
     // read extracted page by GDAL library
     std::string pathPageFile = TestTools::getTestImagePath("svs", "CMU-1-Small-Region-page-0.tif");
     cv::Mat pageRaster;
@@ -279,25 +283,36 @@ TEST(SVSImageDriver, readBlock_PartScale)
     cv::matchTemplate(blockRaster, scaledRaster, score, cv::TM_CCOEFF_NORMED);
     double minScore(0), maxScore(0);
     cv::minMaxLoc(score, &minScore, &maxScore);
-    ASSERT_LT(0.98, minScore);
+    EXPECT_LT(0.98, minScore);
+    //{
+    //    namedWindow( "svs", WINDOW_AUTOSIZE );
+    //    imshow( "svs", blockRaster );
+    //    namedWindow( "gdal", WINDOW_AUTOSIZE );
+    //    imshow( "gdal", scaledRaster ); 
+    //    cv::Mat difmat;
+    //    difmat = scaledRaster - blockRaster;
+    //    namedWindow( "diff", WINDOW_AUTOSIZE );
+    //    imshow( "diff", difmat ); 
+    //    waitKey(0);
+    //}
 }
-TEST(SVSImageDriver, composeRect2)
-{
-    slideio::SVSImageDriver driver;
-    std::string path = TestTools::getTestImagePath("svs", "JP2K-33003-1.svs");
-    std::shared_ptr<slideio::Slide> slide = driver.openFile(path);
-    ASSERT_TRUE(slide != nullptr);
-    int numbScenes = slide->getNumbScenes();
-    ASSERT_TRUE(numbScenes == 4);
-    std::shared_ptr<slideio::Scene> scene = slide->getScene(0);
-    ASSERT_TRUE(scene != nullptr);
-    const cv::Rect sceneRect = scene->getSceneRect();
-    cv::Mat blockRaster;
-    cv::Size blockSize = { sceneRect.width /3, sceneRect.height / 3};
-    cv::Mat image;
-    scene->readResampledBlock(sceneRect, blockSize, image);
-
-    cv::imwrite(R"(d:\Temp\a.bmp)", image);
-}
+//TEST(SVSImageDriver, composeRect2)
+//{
+//    slideio::SVSImageDriver driver;
+//    std::string path = TestTools::getTestImagePath("svs", "JP2K-33003-1.svs");
+//    std::shared_ptr<slideio::Slide> slide = driver.openFile(path);
+//    ASSERT_TRUE(slide != nullptr);
+//    int numbScenes = slide->getNumbScenes();
+//    ASSERT_TRUE(numbScenes == 4);
+//    std::shared_ptr<slideio::Scene> scene = slide->getScene(0);
+//    ASSERT_TRUE(scene != nullptr);
+//    const cv::Rect sceneRect = scene->getSceneRect();
+//    cv::Mat blockRaster;
+//    cv::Size blockSize = { sceneRect.width /3, sceneRect.height / 3};
+//    cv::Mat image;
+//    scene->readResampledBlock(sceneRect, blockSize, image);
+//
+//    cv::imwrite(R"(c:\Temp\a.bmp)", image);
+//}
 
 }

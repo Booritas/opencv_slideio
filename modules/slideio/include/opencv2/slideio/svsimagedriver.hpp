@@ -16,8 +16,8 @@ namespace cv
             SVSImageDriver();
             ~SVSImageDriver();
             std::string getID() const override;
-            bool canOpenFile(const std::string& filePath) const override;
             cv::Ptr<slideio::Slide> openFile(const std::string& filePath) override;
+            std::string getFileSpecs() const override;
         };
     }
 }

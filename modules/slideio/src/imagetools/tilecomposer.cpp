@@ -3,21 +3,11 @@
 // of this distribution and at http://opencv.org/license.html.
 #include "opencv2/slideio/tilecomposer.hpp"
 #include "opencv2/imgproc.hpp"
+#include "opencv2/slideio/imagetools.hpp"
 
 
 using namespace cv;
 
-static void scaleRect(const cv::Rect& srcRect, double scaleX, double scaleY, cv::Rect& trgRect)
-{
-    trgRect.x = static_cast<int>(std::floor(static_cast<double>(srcRect.x)*scaleX));
-    trgRect.y = static_cast<int>(std::floor(static_cast<double>(srcRect.y)*scaleY));
-    int xn = srcRect.x + srcRect.width - 1;
-    int yn = srcRect.y + srcRect.height - 1;
-    int dxn = static_cast<int>(std::ceil(static_cast<double>(xn)* scaleX));
-    int dyn = static_cast<int>(std::ceil(static_cast<double>(yn)* scaleY));
-    trgRect.width = dxn - trgRect.x;
-    trgRect.height = dyn - trgRect.y;
-}
 
 void slideio::TileComposer::composeRect(slideio::Tiler* tiler,
                                         const std::vector<int>& channelIndices,
@@ -33,7 +23,7 @@ void slideio::TileComposer::composeRect(slideio::Tiler* tiler,
     const double scaleX = static_cast<double>(blockSize.width)/static_cast<double>(blockRect.width);
     const double scaleY = static_cast<double>(blockSize.height)/static_cast<double>(blockRect.height);
     cv::Rect scaledBlockRect;
-    scaleRect(blockRect, scaleX, scaleY, scaledBlockRect);
+    slideio::ImageTools::scaleRect(blockRect, blockSize, scaledBlockRect);
 
     for(int tileIndex = 0; tileIndex<tileCount; tileIndex++)
     {
@@ -51,7 +41,7 @@ void slideio::TileComposer::composeRect(slideio::Tiler* tiler,
                     scaledBlockRaster = output.getMat();
                 }
                 cv::Rect scaledTileRect;
-                scaleRect(tileRect, scaleX, scaleY, scaledTileRect);
+                slideio::ImageTools::scaleRect(tileRect, scaleX, scaleY, scaledTileRect);
                 // scale tile raster
                 cv::Mat scaledTileRaster;
                 cv::resize(tileRaster, scaledTileRaster, scaledTileRect.size());
