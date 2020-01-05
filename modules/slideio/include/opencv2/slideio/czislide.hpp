@@ -32,6 +32,7 @@ namespace cv
             double getMagnification() const { return m_magnification; }
             Resolution getResolution() const { return { m_resX, m_resY }; }
             const CZIChannelInfos& getChannelInfo() const { return m_channels; }
+            const std::string& getTitle() const { return m_title; };
         private:
             void init();
             void readMetadata();
@@ -65,6 +66,7 @@ namespace cv
             double m_resY;
             double m_resZ;
             CZIChannelInfos m_channels;
+            std::string m_title;
         };
     }
 }

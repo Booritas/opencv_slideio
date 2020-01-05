@@ -75,13 +75,22 @@ void CZIScene::readResampledBlockChannels(const cv::Rect& blockRect, const cv::S
 
 std::string CZIScene::getName() const
 {
-    return "";
+    return m_name;
 }
 
+void CZIScene::generateSceneName()
+{
+    int s(0), i(0), v(0), h(0), r(0), b(0);
+    CZISlide::dimsFromSceneId(m_id, s, i, v, h, r, b);
+    m_name = (boost::format("%1%(s:%2% i:%3% v:%4% h:%5% r:%6% b:%7%)")
+        % m_slide->getTitle()
+        % s % i % v % h % r % b).str();
+}
 
-void CZIScene::init(const std::string& filePath, const Blocks& blocks, CZISlide* slide)
+void CZIScene::init(uint64_t sceneId, const std::string& filePath, const Blocks& blocks, CZISlide* slide)
 {
     m_slide = slide;
+    m_id = sceneId;
     // separate blocks by zoom levels and detect count of channels and channel data type
     m_filePath = filePath;
     std::map<double, int, double_less> zoomLevelIndices;
@@ -133,6 +142,7 @@ void CZIScene::init(const std::string& filePath, const Blocks& blocks, CZISlide*
         cv::Rect tileRect = { block.x, block.y, block.width, block.height };
         m_sceneRect |= tileRect;
     }
+    generateSceneName();
 }
 
 

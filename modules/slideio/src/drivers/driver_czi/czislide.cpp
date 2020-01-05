@@ -40,8 +40,7 @@ static const XMLElement* getXmlElementByPath(const XMLNode* parent, const std::v
         xmlCurrentElement = xmlCurrentNode->FirstChildElement(tag.c_str());
         if (xmlCurrentElement == nullptr)
         {
-            throw std::runtime_error(
-                (boost::format("CZIImageDriver: Invalid xml. Cannot find node %1%.") % tag).str());
+            return nullptr;
         }
         xmlCurrentNode = xmlCurrentElement;
     }
@@ -157,7 +156,14 @@ void CZISlide::parseMetadataXmL(const char* xmlString, size_t dataSize)
     {
         throw std::runtime_error("CZIImageDriver: Error parsing metadata xml");
     }
-    doc.SaveFile(R"(D:\Temp\czi.xml)");
+    const std::vector<std::string> titlePath = {
+        "ImageDocument","Metadata","Information", "Document","Title"
+    };
+    //doc.SaveFile(R"(D:\Temp\czi.xml)");
+    const XMLElement* xmlTitle = getXmlElementByPath(&doc, titlePath);
+    if(xmlTitle){
+        m_title = xmlTitle->GetText();
+    }
     parseSizes(&doc);
     parseMagnification(&doc);
     parseResolutions(&doc);
@@ -309,7 +315,7 @@ void CZISlide::readDirectory()
     for(const auto& blocks : sceneBlocks)
     {
         cv::Ptr<CZIScene> scene(new CZIScene);
-        scene->init(m_filePath, blocks, this);
+        scene->init(blocks[0].sceneId, m_filePath, blocks, this);
         m_scenes.push_back(scene);
     }
 

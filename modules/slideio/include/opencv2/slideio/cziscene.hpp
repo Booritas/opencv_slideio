@@ -56,7 +56,8 @@ namespace cv
             void readResampledBlockChannels(const cv::Rect& blockRect, const cv::Size& blockSize,
                 const std::vector<int>& channelIndices, cv::OutputArray output) override;
             std::string getName() const override;
-            void init(const std::string& filePath, const Blocks& blocks, CZISlide* slide);
+            void generateSceneName();
+            void init(uint64_t sceneId, const std::string& filePath, const Blocks& blocks, CZISlide* slide);
         private:
             static void combineBlockInTiles(ZoomLevel& zoomLevel);
             void setupChannels(const std::map<int, int>& channelPixelType);
@@ -67,6 +68,8 @@ namespace cv
             cv::Rect m_sceneRect;
             std::map<int, std::pair<int, int>> m_imageChannelToFileChannel;
             CZISlide* m_slide;
+            std::string m_name;
+            uint64_t m_id;
         };
     }
 }

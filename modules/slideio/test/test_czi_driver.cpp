@@ -85,6 +85,8 @@ TEST(Slideio_CZIImageDriver, openFile2)
     EXPECT_LT((100 * std::abs(res.x - fileRes) / fileRes), 1);
     EXPECT_LT((100 * std::abs(res.y - fileRes) / fileRes), 1);
     EXPECT_STREQ(scene->getChannelName(2).c_str(), "664");
+    std::string sceneName = scene->getName();
+    int a = 0;
 }
 
 TEST(Slideio_CZIImageDriver, sceneId)
