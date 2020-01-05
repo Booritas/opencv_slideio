@@ -5,6 +5,7 @@
 #include <boost/format.hpp>
 #include <map>
 #include "opencv2/slideio/czislide.hpp"
+#include "opencv2/slideio/tilecomposer.hpp"
 
 using namespace cv::slideio;
 const double DOUBLE_EPSILON = 1.e-4;
@@ -71,6 +72,8 @@ double CZIScene::getMagnification() const
 void CZIScene::readResampledBlockChannels(const cv::Rect& blockRect, const cv::Size& blockSize,
     const std::vector<int>& channelIndices, cv::OutputArray output)
 {
+    TilerData userData = { 0 };
+    TileComposer::composeRect(this, channelIndices, blockRect, blockSize, output, &userData);
 }
 
 std::string CZIScene::getName() const
@@ -143,6 +146,22 @@ void CZIScene::init(uint64_t sceneId, const std::string& filePath, const Blocks&
         m_sceneRect |= tileRect;
     }
     generateSceneName();
+}
+
+int CZIScene::getTileCount(void* userData)
+{
+    return 0;
+}
+
+bool CZIScene::getTileRect(int tileIndex, cv::Rect& tileRect, void* userData)
+{
+    return false;
+}
+
+bool CZIScene::readTile(int tileIndex, const std::vector<int>& channelIndices, cv::OutputArray tileRaster,
+    void* userData)
+{
+    return false;
 }
 
 

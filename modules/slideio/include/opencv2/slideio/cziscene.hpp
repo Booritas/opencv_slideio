@@ -5,6 +5,7 @@
 #define OPENCV_slideio_cziscene_HPP
 #include "scene.hpp"
 #include "czistructs.hpp"
+#include "opencv2/slideio/tilecomposer.hpp"
 #include <map>
 
 namespace cv
@@ -12,7 +13,7 @@ namespace cv
     namespace slideio
     {
         class CZISlide;
-        class CV_EXPORTS CZIScene : public Scene
+        class CV_EXPORTS CZIScene : public Scene, public Tiler
         {
             enum CZIDataType
             {
@@ -44,6 +45,12 @@ namespace cv
                 std::string name;
                 DataType dataType;
             };
+            struct TilerData
+            {
+                int zoomLevelIndex;
+                int zSliceIndex;
+                int tFrameIndex;
+            };
         public:
             CZIScene();
             std::string getScenePath() const override;
@@ -58,6 +65,11 @@ namespace cv
             std::string getName() const override;
             void generateSceneName();
             void init(uint64_t sceneId, const std::string& filePath, const Blocks& blocks, CZISlide* slide);
+            // interface Tiler implementaton
+            int getTileCount(void* userData) override;
+            bool getTileRect(int tileIndex, cv::Rect& tileRect, void* userData) override;
+            bool readTile(int tileIndex, const std::vector<int>& channelIndices, cv::OutputArray tileRaster,
+                void* userData) override;
         private:
             static void combineBlockInTiles(ZoomLevel& zoomLevel);
             void setupChannels(const std::map<int, int>& channelPixelType);

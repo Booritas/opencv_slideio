@@ -6,6 +6,7 @@
 #include "opencv2/slideio/svstools.hpp"
 #include "opencv2/slideio/imagetools.hpp"
 #include "opencv2/slideio/svsscene.hpp"
+#include "opencv2/slideio/tools.hpp"
 
 using namespace cv::slideio;
 
@@ -86,37 +87,12 @@ void SVSTiledScene::readResampledBlockChannels(const cv::Rect& blockRect, const 
 const TiffDirectory& SVSTiledScene::findZoomDirectory(double zoom) const
 {
     const cv::Rect sceneRect = getSceneRect();
-    const TiffDirectory& baseDir = m_directories[0];
-    double baseZoom = static_cast<double>(baseDir.width) / static_cast<double>(sceneRect.width);
-    if(zoom>= baseZoom)
-    {
-        return m_directories[0];
-    }
-    int dirGoodIndex = -1;
-    double lastZoom = baseZoom;
-    for(int dirIndex=1; dirIndex<m_directories.size(); dirIndex++)
-    {
-        const TiffDirectory& dir = m_directories[dirIndex];
-        double currentZoom = static_cast<double>(dir.width) / static_cast<double>(sceneRect.width);
-        double absDif = std::abs(currentZoom - zoom);
-        double relDif = absDif / currentZoom;
-        if(relDif < 0.01)
-        {
-            dirGoodIndex = dirIndex;
-            break;
-        }
-        if(zoom<=lastZoom && zoom>currentZoom)
-        {
-            dirGoodIndex = dirIndex-1;
-            break;
-        }
-        lastZoom = currentZoom;
-    }
-    if(dirGoodIndex<0)
-    {
-        dirGoodIndex = static_cast<int>(m_directories.size()) - 1;
-    }
-    return  m_directories[dirGoodIndex];
+    const double sceneWidth = static_cast<double>(sceneRect.width);
+    const auto& directories = m_directories;
+    int index = Tools::findZoomLevel(zoom, (int)m_directories.size(), [&directories, sceneWidth](int index){
+        return directories[index].width/sceneWidth;
+    });
+    return m_directories[index];
 }
 
 int SVSTiledScene::getTileCount(void* userData)

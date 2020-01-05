@@ -13,20 +13,20 @@
 
 namespace opencv_test {
 
-TEST(SVSImageDriver, driverID)
+TEST(Slideio_SVSImageDriver, driverID)
 {
     slideio::SVSImageDriver driver;
     EXPECT_EQ(driver.getID(), "SVS");
 }
 
-TEST(SVSImageDriver, canOpenFile)
+TEST(Slideio_SVSImageDriver, canOpenFile)
 {
     slideio::SVSImageDriver driver;
     EXPECT_TRUE(driver.canOpenFile("abc.svs"));
     EXPECT_FALSE(driver.canOpenFile("abc.tif"));
 }
 
-TEST(SVSImageDriver, openFile_BrightField)
+TEST(Slideio_SVSImageDriver, openFile_BrightField)
 {
     slideio::SVSImageDriver driver;
     std::string path = TestTools::getTestImagePath("svs","CMU-1-Small-Region.svs");
@@ -53,7 +53,7 @@ TEST(SVSImageDriver, openFile_BrightField)
     EXPECT_EQ(20., magn);
 }
 
-TEST(SVSImageDriver, read_Thumbnail_WholeImage)
+TEST(Slideio_SVSImageDriver, read_Thumbnail_WholeImage)
 {
     // read image by svs driver
     slideio::SVSImageDriver driver;
@@ -80,7 +80,7 @@ TEST(SVSImageDriver, read_Thumbnail_WholeImage)
     ASSERT_LT(0.99, minScore);
 }
 
-TEST(SVSImageDriver, read_Thumbnail_Block)
+TEST(Slideio_SVSImageDriver, read_Thumbnail_Block)
 {
     // read image by svs driver
     slideio::SVSImageDriver driver;
@@ -116,7 +116,7 @@ TEST(SVSImageDriver, read_Thumbnail_Block)
     ASSERT_LT(0.99, minScore);
 }
 
-TEST(SVSImageDriver, read_Thumbnail_BlockWithScale)
+TEST(Slideio_SVSImageDriver, read_Thumbnail_BlockWithScale)
 {
     // read image by svs driver
     slideio::SVSImageDriver driver;
@@ -157,7 +157,7 @@ TEST(SVSImageDriver, read_Thumbnail_BlockWithScale)
     ASSERT_LT(0.99, minScore);
 }
 
-TEST(SVSImageDriver, findZoomDirectory)
+TEST(Slideio_SVSImageDriver, findZoomDirectory)
 {
     std::vector<slideio::TiffDirectory> dirs;
     dirs.resize(10);
@@ -192,7 +192,7 @@ TEST(SVSImageDriver, findZoomDirectory)
     EXPECT_EQ(scene.findZoomDirectory(0.1).dirIndex, 3);
 }
 
-TEST(SVSImageDriver, readBlock_WholeImage)
+TEST(Slideio_SVSImageDriver, readBlock_WholeImage)
 {
     slideio::SVSImageDriver driver;
     std::string path = TestTools::getTestImagePath("svs", "CMU-1-Small-Region.svs");
@@ -224,7 +224,7 @@ TEST(SVSImageDriver, readBlock_WholeImage)
     ASSERT_LT(0.99, minScore);
 }
 
-TEST(SVSImageDriver, readBlock_Part)
+TEST(Slideio_SVSImageDriver, readBlock_Part)
 {
     slideio::SVSImageDriver driver;
     std::string path = TestTools::getTestImagePath("svs", "CMU-1-Small-Region.svs");
@@ -253,7 +253,7 @@ TEST(SVSImageDriver, readBlock_Part)
     ASSERT_LT(0.99, minScore);
 }
 
-TEST(SVSImageDriver, readBlock_PartScale)
+TEST(Slideio_SVSImageDriver, readBlock_PartScale)
 {
     slideio::SVSImageDriver driver;
     std::string path = TestTools::getTestImagePath("svs", "CMU-1-Small-Region.svs");
