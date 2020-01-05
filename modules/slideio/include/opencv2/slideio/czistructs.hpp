@@ -60,6 +60,34 @@ namespace cv
             int32_t storedSize;
         };
         #pragma pack(pop)
+        struct CZIChannelInfo
+        {
+            std::string id;
+        };
+        typedef std::vector<CZIChannelInfo> CZIChannelInfos;
+        struct Dimension
+        {
+            char type;
+            int start;
+            int size;
+        };
+        struct Block
+        {
+            int32_t pixelType;
+            int64_t filePosition;
+            int32_t filePart;
+            int32_t compression;
+            int32_t x;
+            int32_t y;
+            int32_t width;
+            int32_t height;
+            uint64_t sceneId;
+            int32_t firstChannel;
+            int32_t lastChannel;
+            double zoom;
+            std::vector<Dimension> dimensions;
+        };
+        typedef std::vector<Block> Blocks;
     }
 }
 #endif

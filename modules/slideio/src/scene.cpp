@@ -5,6 +5,11 @@
 
 using namespace cv::slideio;
 
+std::string Scene::getChannelName(int) const
+{
+    return "";
+}
+
 void Scene::readBlock(const cv::Rect& blockRect, cv::OutputArray output)
 {
     const std::vector<int> channelIndices;
