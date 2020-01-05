@@ -6,6 +6,7 @@
 #include <map>
 #include "opencv2/slideio/czislide.hpp"
 #include "opencv2/slideio/tilecomposer.hpp"
+#include "opencv2/slideio/tools.hpp"
 
 using namespace cv::slideio;
 const double DOUBLE_EPSILON = 1.e-4;
@@ -73,6 +74,11 @@ void CZIScene::readResampledBlockChannels(const cv::Rect& blockRect, const cv::S
     const std::vector<int>& channelIndices, cv::OutputArray output)
 {
     TilerData userData = { 0 };
+    double zoom = static_cast<double>(blockSize.width) / static_cast<double>(blockRect.width);
+    const auto& zoomLevels = m_zoomLevels;
+    userData.zoomLevelIndex = Tools::findZoomLevel(zoom, static_cast<int>(m_zoomLevels.size()), [&zoomLevels](int index){
+        return zoomLevels[index].zoom;
+    });
     TileComposer::composeRect(this, channelIndices, blockRect, blockSize, output, &userData);
 }
 
