@@ -75,59 +75,6 @@ cv::Ptr<Scene> CZISlide::getScene(int index) const
 	return m_scenes[index];
 }
 
-
-uint64_t CZISlide::sceneIdFromDims(int s, int i, int v, int h, int r, int b)
-{
-    const uint64_t values[] = { (uint64_t)s, (uint64_t)i , (uint64_t)v, (uint64_t)h, (uint64_t)r, (uint64_t)b };
-    const uint64_t digitsPerValue = 1000;
-    uint64_t sceneId = 0;
-    uint64_t mult = 1;
-    for (int val = 0; val < 6; ++val)
-    {
-        sceneId += values[val] * mult;
-        mult *= digitsPerValue;
-    }
-    return sceneId;
-}
-
-uint64_t CZISlide::sceneIdFromDims(const std::vector<Dimension>& dims)
-{
-    int s(0), i(0), v(0), h(0), r(0), b(0);
-    for(const auto& dim : dims)
-    {
-        switch(dim.type)
-        {
-        case 'S': s = dim.start; break;
-        case 'I': i = dim.start; break;
-        case 'V': v = dim.start; break;
-        case 'H': h = dim.start; break;
-        case 'R': r = dim.start; break;
-        case 'B': b = dim.start; break;
-        }
-    }
-    return sceneIdFromDims(s, i, v, h, r, b);
-}
-
-void CZISlide::dimsFromSceneId(uint64_t sceneId, int& s, int& i, int& v, int& h, int& r, int& b)
-{
-    uint64_t values[6] = { 0 };
-    const uint64_t digitsPerValue = 1000;
-    uint64_t mult1 = 1000;
-    uint64_t mult2 = 1;
-    for (int val = 0; val < 6; val++)
-    {
-        values[val] = (sceneId % mult1) / mult2;
-        mult1 *= digitsPerValue;
-        mult2 *= digitsPerValue;
-    }
-    s = (int)values[0];
-    i = (int)values[1];
-    v = (int)values[2];
-    h = (int)values[3];
-    r = (int)values[4];
-    b = (int)values[5];
-}
-
 void CZISlide::init()
 {
     // read file header
@@ -254,57 +201,24 @@ void CZISlide::readDirectory()
     std::map<uint64_t, int> sceneMap;
     for (unsigned int entry = 0; entry < directoryHeader.entryCount; ++entry)
     {
-        Block block;
+        CZISubBlock block;
         DirectoryEntryDV entryHeader;
         m_fileStream.read(reinterpret_cast<char*>(&entryHeader), sizeof(entryHeader));
-        block.filePosition = entryHeader.filePosition;
-        block.compression = entryHeader.compression;
-        block.filePart = entryHeader.filePart;
-        block.pixelType = entryHeader.pixelType;
-        block.dimensions.reserve(entryHeader.dimensionCount);
+        std::vector<DimensionEntryDV> dimensions(entryHeader.dimensionCount);
         for (int dim = 0; dim < entryHeader.dimensionCount; ++dim)
         {
-            DimensionEntryDV dimEntry;
+            DimensionEntryDV& dimEntry = dimensions[dim];
             m_fileStream.read(reinterpret_cast<char*>(&dimEntry), sizeof(dimEntry));
-            if (dimEntry.dimension[0] == 'X')
-            {
-                block.x = dimEntry.start;
-                block.width = dimEntry.storedSize;
-                block.zoom = dimEntry.storedSize / dimEntry.size;
-            }
-            else if (dimEntry.dimension[0] == 'Y')
-            {
-                block.y = dimEntry.start;
-                block.height = dimEntry.storedSize;
-            }
-            else
-            {
-                if(dimEntry.dimension[0]=='C')
-                {
-                    block.firstChannel = dimEntry.start;
-                    block.lastChannel = dimEntry.start + dimEntry.size - 1;
-                }
-                Dimension dimension;
-                dimension.type = dimEntry.dimension[0];
-                dimension.start = dimEntry.start;
-                dimension.size = dimEntry.size;
-                block.dimensions.push_back(dimension);
-                if(dimension.size!=1)
-                {
-                    throw std::runtime_error(
-                        (boost::format("CZIImageDriver: unexpected configuration for dimension '%1%'") % dimension.type).str()
-                    );
-                }
-            }
         }
-        block.sceneId = sceneIdFromDims(block.dimensions);
-        auto sceneIt = sceneMap.find(block.sceneId);
+        block.setupBlock(entryHeader, dimensions);
+        const uint64_t sceneId = block.sceneId();
+        auto sceneIt = sceneMap.find(sceneId);
         int sceneIndex = 0;
         if(sceneIt==sceneMap.end())
         {
             sceneIndex = static_cast<int>(sceneBlocks.size());
             sceneBlocks.emplace_back();
-            sceneMap[block.sceneId] = sceneIndex;
+            sceneMap[sceneId] = sceneIndex;
         }
         else
         {
@@ -314,8 +228,11 @@ void CZISlide::readDirectory()
     }
     for(const auto& blocks : sceneBlocks)
     {
+        CZIScene::SceneParams params;
         cv::Ptr<CZIScene> scene(new CZIScene);
-        scene->init(blocks[0].sceneId, m_filePath, blocks, this);
+        const uint64_t sceneId = blocks[0].sceneId();
+        CZIScene::dimsFromSceneId(sceneId, params);
+        scene->init(params, m_filePath, blocks, this);
         m_scenes.push_back(scene);
     }
 

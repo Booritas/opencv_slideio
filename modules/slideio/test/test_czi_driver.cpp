@@ -94,8 +94,8 @@ TEST(Slideio_CZIImageDriver, sceneId)
     {
         int values[] = { 1, 2, 3, 4, 5, 6 };
         int values2[6] = { 0 };
-        uint64_t sceneId = slideio::CZISlide::sceneIdFromDims(values[0], values[1], values[2], values[3], values[4], values[5]);
-        slideio::CZISlide::dimsFromSceneId(sceneId, values2[0], values2[1], values2[2], values2[3], values2[4], values2[5]);
+        uint64_t sceneId = slideio::CZIScene::sceneIdFromDims(values[0], values[1], values[2], values[3], values[4], values[5]);
+        slideio::CZIScene::dimsFromSceneId(sceneId, values2[0], values2[1], values2[2], values2[3], values2[4], values2[5]);
         for (int val = 0; val < 6; val++)
         {
             EXPECT_EQ(values[val], values2[val]);
@@ -104,8 +104,8 @@ TEST(Slideio_CZIImageDriver, sceneId)
     {
         int values[] = { 1, 0, 0, 0, 0, 0 };
         int values2[6] = { 0 };
-        uint64_t sceneId = slideio::CZISlide::sceneIdFromDims(values[0], values[1], values[2], values[3], values[4], values[5]);
-        slideio::CZISlide::dimsFromSceneId(sceneId, values2[0], values2[1], values2[2], values2[3], values2[4], values2[5]);
+        uint64_t sceneId = slideio::CZIScene::sceneIdFromDims(values[0], values[1], values[2], values[3], values[4], values[5]);
+        slideio::CZIScene::dimsFromSceneId(sceneId, values2[0], values2[1], values2[2], values2[3], values2[4], values2[5]);
         for (int val = 0; val < 6; val++)
         {
             EXPECT_EQ(values[val], values2[val]);
@@ -114,8 +114,8 @@ TEST(Slideio_CZIImageDriver, sceneId)
     {
         int values[] = { 0, 0, 4, 0, 0, 0 };
         int values2[6] = { 0 };
-        uint64_t sceneId = slideio::CZISlide::sceneIdFromDims(values[0], values[1], values[2], values[3], values[4], values[5]);
-        slideio::CZISlide::dimsFromSceneId(sceneId, values2[0], values2[1], values2[2], values2[3], values2[4], values2[5]);
+        uint64_t sceneId = slideio::CZIScene::sceneIdFromDims(values[0], values[1], values[2], values[3], values[4], values[5]);
+        slideio::CZIScene::dimsFromSceneId(sceneId, values2[0], values2[1], values2[2], values2[3], values2[4], values2[5]);
         for (int val = 0; val < 6; val++)
         {
             EXPECT_EQ(values[val], values2[val]);
@@ -124,8 +124,8 @@ TEST(Slideio_CZIImageDriver, sceneId)
     {
         int values[] = { 0, 0, 0, 0, 10, 0 };
         int values2[6] = { 0 };
-        uint64_t sceneId = slideio::CZISlide::sceneIdFromDims(values[0], values[1], values[2], values[3], values[4], values[5]);
-        slideio::CZISlide::dimsFromSceneId(sceneId, values2[0], values2[1], values2[2], values2[3], values2[4], values2[5]);
+        uint64_t sceneId = slideio::CZIScene::sceneIdFromDims(values[0], values[1], values[2], values[3], values[4], values[5]);
+        slideio::CZIScene::dimsFromSceneId(sceneId, values2[0], values2[1], values2[2], values2[3], values2[4], values2[5]);
         for (int val = 0; val < 6; val++)
         {
             EXPECT_EQ(values[val], values2[val]);

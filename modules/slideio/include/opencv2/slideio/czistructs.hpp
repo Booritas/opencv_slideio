@@ -71,23 +71,20 @@ namespace cv
             int start;
             int size;
         };
-        struct Block
+        enum CZIDataType
         {
-            int32_t pixelType;
-            int64_t filePosition;
-            int32_t filePart;
-            int32_t compression;
-            int32_t x;
-            int32_t y;
-            int32_t width;
-            int32_t height;
-            uint64_t sceneId;
-            int32_t firstChannel;
-            int32_t lastChannel;
-            double zoom;
-            std::vector<Dimension> dimensions;
+            Gray8 = 0,
+            Gray16 = 1,
+            Gray32Float = 2,
+            Bgr24 = 3,
+            Bgr48 = 4,
+            Bgr96Float = 8,
+            Bgra32 = 9,
+            Gray64ComplexFloat = 10,
+            Bgr192ComplexFloat = 11,
+            Gray32 = 12,
+            Gray64 = 13,
         };
-        typedef std::vector<Block> Blocks;
     }
 }
 #endif

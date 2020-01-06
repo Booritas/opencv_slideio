@@ -26,9 +26,6 @@ namespace cv
             int getNumbScenes() const override;
             std::string getFilePath() const override;
             cv::Ptr<Scene> getScene(int index) const override;
-            static uint64_t sceneIdFromDims(int s, int i, int v, int h, int r, int b);
-            static uint64_t sceneIdFromDims(const std::vector<Dimension>& dims);
-            static void dimsFromSceneId(uint64_t sceneId, int& s, int& i, int& v, int& h, int& r, int& b);
             double getMagnification() const { return m_magnification; }
             Resolution getResolution() const { return { m_resX, m_resY }; }
             const CZIChannelInfos& getChannelInfo() const { return m_channels; }
