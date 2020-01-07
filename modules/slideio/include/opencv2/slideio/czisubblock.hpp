@@ -40,8 +40,8 @@ namespace cv
             int64_t computeFileOffset(int channel, int z, int t, int r, int s, int i, int b, int h, int v) const;
             void setupBlock(const DirectoryEntryDV& directoryHeader, std::vector<DimensionEntryDV>& dimensions);
             bool isInBlock(int channel, int z, int t, int r, int s, int i, int b, int h, int v) const;
-            uint64_t sceneId() const { return m_sceneId; }
             int pixelSize() const { return m_pixelSize; }
+            const std::vector<Dimension>& dimensions() const {return m_dimensions;}
         private:
             int firstDimensionIndex(int dimension) const
             {
@@ -63,7 +63,6 @@ namespace cv
             int64_t m_filePosition;
             int32_t m_filePart;
             int32_t m_compression;
-            uint64_t m_sceneId;
             int m_channelIndex;
             int m_zSliceIndex;
             int m_tFrameIndex;

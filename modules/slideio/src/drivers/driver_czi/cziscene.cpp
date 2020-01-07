@@ -8,6 +8,7 @@
 #include "opencv2/slideio/tilecomposer.hpp"
 #include "opencv2/slideio/tools.hpp"
 #include "opencv2/slideio/imagetools.hpp"
+#include <set>
 
 using namespace cv::slideio;
 const double DOUBLE_EPSILON = 1.e-4;
@@ -108,11 +109,11 @@ void CZIScene::generateSceneName()
         % m_sceneParams.bAccusitionIndex).str();
 }
 
-void CZIScene::init(SceneParams& sceneParams, const std::string& filePath, const Blocks& blocks, CZISlide* slide)
+void CZIScene::init(uint64_t sceneId, SceneParams& sceneParams, const std::string& filePath, const Blocks& blocks, CZISlide* slide)
 {
     m_sceneParams = sceneParams;
     m_slide = slide;
-    m_id = blocks[0].sceneId();
+    m_id = sceneId;
     // separate blocks by zoom levels and detect count of channels and channel data type
     m_filePath = filePath;
     std::map<double, int, double_less> zoomLevelIndices;
@@ -432,6 +433,60 @@ uint64_t CZIScene::sceneIdFromDims(const std::vector<Dimension>& dims)
         }
     }
     return sceneIdFromDims(s, i, v, h, r, b);
+}
+
+inline int getDimensionValue(const std::map<char, int>& dimensionIndices, char dim, std::vector<int>& dimensionValues)
+{
+    int val = 0;
+    auto it = dimensionIndices.find(dim);
+    if(it!=dimensionIndices.end())
+    {
+        int index = it->second;
+        val = dimensionValues[index];
+    }
+    return val;
+}
+
+static void extractSceneIds(const std::vector<Dimension>& dims, const std::map<char, int>& dimensionIndices,
+    std::vector<int>& dimensionValues, int curDim, std::set<uint64_t>& sceneIds)
+{
+    const auto& dim = dims[curDim];
+    const int startIndex = dim.start;
+    const int stopIndex = startIndex + dim.size;
+    const int nextDim = curDim + 1;
+    for(int index=startIndex; index<stopIndex; ++index)
+    {
+        dimensionValues[curDim] = index;
+        if(nextDim<dims.size())
+        {
+            extractSceneIds(dims, dimensionIndices, dimensionValues, nextDim, sceneIds);
+        }
+        else
+        {
+            const auto s = getDimensionValue(dimensionIndices, 'S', dimensionValues);
+            const auto i = getDimensionValue(dimensionIndices, 'I', dimensionValues);
+            const auto v = getDimensionValue(dimensionIndices, 'V', dimensionValues);
+            const auto h = getDimensionValue(dimensionIndices, 'H', dimensionValues);
+            const auto r = getDimensionValue(dimensionIndices, 'R', dimensionValues);
+            const auto b = getDimensionValue(dimensionIndices, 'B', dimensionValues);
+
+            uint64_t sceneId = CZIScene::sceneIdFromDims(s,i,v,h,r,b);
+            sceneIds.insert(sceneId);
+        }
+    }
+}
+
+void CZIScene::sceneIdsFromDims(const std::vector<Dimension>& dims, std::vector<uint64_t>& ids)
+{
+    std::map<char, int> dimensionIndices;
+    for(auto dim=0; dim<dims.size(); ++dim)
+    {
+        dimensionIndices[dims[dim].type] = dim;
+    }
+    std::set<uint64_t> sceneIdset;
+    std::vector<int> indices(dims.size());
+    extractSceneIds(dims, dimensionIndices, indices, 0, sceneIdset);
+    std::copy(sceneIdset.begin(), sceneIdset.end(), std::back_inserter(ids));
 }
 
 uint64_t CZIScene::sceneIdFromDims(const SceneParams& params)

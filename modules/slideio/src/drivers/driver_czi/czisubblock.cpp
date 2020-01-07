@@ -22,7 +22,7 @@ bool cv::slideio::CZISubBlock::isInBlock(int channel, int z, int t, int r, int s
 
 cv::slideio::CZISubBlock::CZISubBlock() : m_pixelType(0), m_pixelSize(1), m_planeSize(0), m_filePosition(-1),
                                          m_filePart(-1), m_compression(-1),
-                                         m_sceneId(0), m_channelIndex(0), m_zSliceIndex(-1), m_tFrameIndex(-1),
+                                         m_channelIndex(0), m_zSliceIndex(-1), m_tFrameIndex(-1),
                                          m_illuminationIndex(-1),
                                          m_bAccusitionIndex(-1), m_rotationIndex(-1), m_sceneIndex(-1),
                                          m_hPhaseIndex(-1), m_viewIndex(-1), m_zoom(1.)
@@ -161,6 +161,5 @@ void cv::slideio::CZISubBlock::setupBlock(const DirectoryEntryDV& entryHeader, s
             Dimension dimension = { dimEntry.dimension[0], dimEntry.start , dimEntry.size};
             m_dimensions.push_back(dimension);
         }
-        m_sceneId = CZIScene::sceneIdFromDims(m_dimensions);
     }
 }

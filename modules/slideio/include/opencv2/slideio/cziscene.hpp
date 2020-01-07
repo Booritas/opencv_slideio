@@ -71,7 +71,7 @@ namespace cv
                 const std::vector<int>& componentIndices, cv::OutputArray output) override;
             std::string getName() const override;
             void generateSceneName();
-            void init(SceneParams& sceneParams, const std::string& filePath, const Blocks& blocks, CZISlide* slide);
+            void init(uint64_t sceneId, SceneParams& sceneParams, const std::string& filePath, const Blocks& blocks, CZISlide* slide);
             // interface Tiler implementaton
             int getTileCount(void* userData) override;
             bool getTileRect(int tileIndex, cv::Rect& tileRect, void* userData) override;
@@ -84,6 +84,7 @@ namespace cv
             // static members
             static uint64_t sceneIdFromDims(int s, int i, int v, int h, int r, int b);
             static uint64_t sceneIdFromDims(const std::vector<Dimension>& dims);
+            static void sceneIdsFromDims(const std::vector<Dimension>& dims, std::vector<uint64_t>& ids);
             static uint64_t sceneIdFromDims(const SceneParams& params);
             static void dimsFromSceneId(uint64_t sceneId, int& s, int& i, int& v, int& h, int& r, int& b);
             static void dimsFromSceneId(uint64_t sceneId, SceneParams& params);

@@ -132,5 +132,70 @@ TEST(Slideio_CZIImageDriver, sceneId)
         }
     }
 }
+TEST(Slideio_CZIImageDriver, sceneIdsFromDims)
+{
+    {
+        std::vector<slideio::Dimension> dims = {
+            {'V',1,1},
+            {'H',2,1},
+            {'I',3,1},
+            {'R',4,1},
+            {'B',5,1},
+            {'S',6,1},
+        };
+        std::vector<uint64_t> ids;
+        slideio::CZIScene::sceneIdsFromDims(dims, ids);
+        auto sceneId = slideio::CZIScene::sceneIdFromDims(6,3,1,2,4,5);
+        EXPECT_EQ(ids.size(),1);
+        EXPECT_EQ(ids[0], sceneId);
+    }
+    {
+        std::vector<slideio::Dimension> dims = {
+            {'V',1,1},
+            {'H',2,1},
+            {'I',3,1},
+            {'R',4,1},
+            {'B',5,1},
+            {'S',6,2},
+        };
+        std::vector<uint64_t> ids;
+        slideio::CZIScene::sceneIdsFromDims(dims, ids);
+        auto sceneId1 = slideio::CZIScene::sceneIdFromDims(6,3,1,2,4,5);
+        auto sceneId2 = slideio::CZIScene::sceneIdFromDims(7,3,1,2,4,5);
+        EXPECT_EQ(ids.size(),2);
+        EXPECT_EQ(ids[0], sceneId1);
+        EXPECT_EQ(ids[1], sceneId2);
+    }
+    {
+        std::vector<slideio::Dimension> dims = {
+            {'V',1,2},
+            {'S',6,2},
+        };
+        std::vector<uint64_t> ids;
+        slideio::CZIScene::sceneIdsFromDims(dims, ids);
+        auto sceneId1 = slideio::CZIScene::sceneIdFromDims(6,0,1,0,0,0);
+        auto sceneId2 = slideio::CZIScene::sceneIdFromDims(6,0,2,0,0,0);
+        auto sceneId3 = slideio::CZIScene::sceneIdFromDims(7,0,1,0,0,0);
+        auto sceneId4 = slideio::CZIScene::sceneIdFromDims(7,0,2,0,0,0);
+        EXPECT_EQ(ids.size(),4);
+        EXPECT_TRUE(std::find(ids.begin(), ids.end(),sceneId1)!=ids.end());
+        EXPECT_TRUE(std::find(ids.begin(), ids.end(),sceneId2)!=ids.end());
+        EXPECT_TRUE(std::find(ids.begin(), ids.end(),sceneId3)!=ids.end());
+        EXPECT_TRUE(std::find(ids.begin(), ids.end(),sceneId4)!=ids.end());
+    }
+    {
+        std::vector<slideio::Dimension> dims = {
+            {'V',1,2},
+            {'H',2,2},
+            {'I',3,2},
+            {'R',4,2},
+            {'B',5,2},
+            {'S',6,2},
+        };
+        std::vector<uint64_t> ids;
+        slideio::CZIScene::sceneIdsFromDims(dims, ids);
+        EXPECT_EQ(ids.size(),64);
+    }
+}
 
 }

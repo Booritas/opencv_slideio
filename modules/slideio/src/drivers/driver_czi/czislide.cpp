@@ -150,7 +150,7 @@ void CZISlide::readMetadata()
     // position stream pointer to metadata segment
     m_fileStream.seekg(m_metadataPosition, std::ios_base::beg);
     // read segment header
-    SegmentHeader header;
+    SegmentHeader header{};
     m_fileStream.read((char*)&header, sizeof(header));
     if (strncmp(header.SID, SID_METADATA, sizeof(SID_METADATA)) != 0)
     {
@@ -158,9 +158,8 @@ void CZISlide::readMetadata()
             (boost::format("CZIImageDriver: invalid metadata segment in file %1%.") % m_filePath).str());
     }
     // read metadata header
-    MetadataHeader metadataHeader;
+    MetadataHeader metadataHeader{};
     m_fileStream.read((char*)&metadataHeader, sizeof(metadataHeader));
-    const int32_t metadataHeaderSize = 256;
     const uint32_t xmlSize = metadataHeader.xmlSize;;
     std::vector<char> xmlString(xmlSize);
     // read metadata xml
@@ -170,8 +169,8 @@ void CZISlide::readMetadata()
 
 void CZISlide::readFileHeader()
 {
-    FileHeader fileHeader;
-    SegmentHeader header;
+    FileHeader fileHeader{};
+    SegmentHeader header{};
     m_fileStream.read(reinterpret_cast<char*>(&header), sizeof(header));
     if (strncmp(header.SID, SID_FILES, sizeof(SID_FILES)) != 0)
     {
@@ -188,21 +187,22 @@ void CZISlide::readDirectory()
     // position stream pointer to the directory segment
     m_fileStream.seekg(m_directoryPosition, std::ios_base::beg);
     // read segment header
-    SegmentHeader header;
+    SegmentHeader header{};
     m_fileStream.read(reinterpret_cast<char*>(&header), sizeof(header));
     if (strncmp(header.SID, SID_DIRECTORY, sizeof(SID_DIRECTORY)) != 0)
     {
         throw std::runtime_error(
             (boost::format("CZIImageDriver: invalid directory segment of file %1%.") % m_filePath).str());
     }
-    DirectoryHeader directoryHeader;
+    DirectoryHeader directoryHeader{};
     m_fileStream.read(reinterpret_cast<char*>(&directoryHeader), sizeof(directoryHeader));
     std::vector<Blocks> sceneBlocks;
+    std::vector<uint64_t> sceneIds;
     std::map<uint64_t, int> sceneMap;
     for (unsigned int entry = 0; entry < directoryHeader.entryCount; ++entry)
     {
         CZISubBlock block;
-        DirectoryEntryDV entryHeader;
+        DirectoryEntryDV entryHeader{};
         m_fileStream.read(reinterpret_cast<char*>(&entryHeader), sizeof(entryHeader));
         std::vector<DimensionEntryDV> dimensions(entryHeader.dimensionCount);
         for (int dim = 0; dim < entryHeader.dimensionCount; ++dim)
@@ -211,28 +211,35 @@ void CZISlide::readDirectory()
             m_fileStream.read(reinterpret_cast<char*>(&dimEntry), sizeof(dimEntry));
         }
         block.setupBlock(entryHeader, dimensions);
-        const uint64_t sceneId = block.sceneId();
-        auto sceneIt = sceneMap.find(sceneId);
-        int sceneIndex = 0;
-        if(sceneIt==sceneMap.end())
+        const std::vector<Dimension>& blockDimensions = block.dimensions();
+        std::vector<uint64_t> blockSceneIds;
+        CZIScene::sceneIdsFromDims(blockDimensions, blockSceneIds);
+        for(const auto& sceneId : blockSceneIds)
         {
-            sceneIndex = static_cast<int>(sceneBlocks.size());
-            sceneBlocks.emplace_back();
-            sceneMap[sceneId] = sceneIndex;
+            auto sceneIt = sceneMap.find(sceneId);
+            int sceneIndex = 0;
+            if(sceneIt==sceneMap.end())
+            {
+                sceneIndex = static_cast<int>(sceneBlocks.size());
+                sceneBlocks.emplace_back();
+                sceneMap[sceneId] = sceneIndex;
+                sceneIds.push_back(sceneId);
+            }
+            else
+            {
+                sceneIndex = sceneIt->second;
+            }
+            sceneBlocks[sceneIndex].push_back(block);
         }
-        else
-        {
-            sceneIndex = sceneIt->second;
-        }
-        sceneBlocks[sceneIndex].push_back(block);
     }
-    for(const auto& blocks : sceneBlocks)
+    for(size_t sceneIndex = 0; sceneIndex < sceneBlocks.size(); ++sceneIndex)
     {
-        CZIScene::SceneParams params;
+        const uint64_t sceneId = sceneIds[sceneIndex];
+        const Blocks& blocks = sceneBlocks[sceneIndex];
+        CZIScene::SceneParams params{};
         cv::Ptr<CZIScene> scene(new CZIScene);
-        const uint64_t sceneId = blocks[0].sceneId();
         CZIScene::dimsFromSceneId(sceneId, params);
-        scene->init(params, m_filePath, blocks, this);
+        scene->init(sceneId, params, m_filePath, blocks, this);
         m_scenes.push_back(scene);
     }
 
