@@ -5,7 +5,7 @@
 
 namespace opencv_test {
 
-TEST(SVSTools, extractMagnification)
+TEST(Slideio_SVSTools, extractMagnification)
 {
 	std::string description = "Aperio Image Library v11.2.1\n"
 		"46000x32914 [42673,5576 2220x2967] (240x240) JPEG/RGB Q=30;Aperio Image Library v10.0.51\n"

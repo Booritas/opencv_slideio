@@ -6,7 +6,7 @@
 
 namespace opencv_test {
 
-TEST(TiffToolsTest, scanTiffFile)
+TEST(Slideio_TiffTools, scanTiffFile)
 {
     std::string filePath = TestTools::getTestImagePath("svs","JP2K-33003-1.svs");
     std::vector<slideio::TiffDirectory> dirs;
@@ -37,7 +37,7 @@ TEST(TiffToolsTest, scanTiffFile)
     EXPECT_EQ(7,dir5.compression);
 }
 
-TEST(TiffToolsTest, readStripedDir)
+TEST(Slideio_TiffTools, readStripedDir)
 {
     std::string filePathTiff = TestTools::getTestImagePath("svs","CMU-1-Small-Region.svs");
     std::string filePathBmp = TestTools::getTestImagePath("svs", "CMU-1-Small-Region-page-2.bmp");
@@ -64,7 +64,7 @@ TEST(TiffToolsTest, readStripedDir)
 
 }
 
-TEST(TiffToolsTest, readTile_jpeg)
+TEST(Slideio_TiffTools, readTile_jpeg)
 {
     const std::string filePath = 
         TestTools::getTestImagePath("svs","CMU-1-Small-Region.svs");
@@ -100,7 +100,7 @@ TEST(TiffToolsTest, readTile_jpeg)
     ASSERT_TRUE(equal);
 }
 
-TEST(TiffToolsTest, readTile_J2K)
+TEST(Slideio_TiffTools, readTile_J2K)
 {
     const std::string filePath = 
         TestTools::getTestImagePath("svs","JP2K-33003-1.svs");

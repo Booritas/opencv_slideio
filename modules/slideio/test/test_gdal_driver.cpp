@@ -6,20 +6,20 @@
 
 namespace opencv_test {
 
-TEST(GDALDriverTest, driverID)
+TEST(Slideio_GDALDriver, driverID)
 {
     slideio::GDALImageDriver driver;
     EXPECT_EQ(driver.getID(), "GDAL");
 }
 
-TEST(GDALDriverTest, canOpenFile)
+TEST(Slideio_GDALDriver, canOpenFile)
 {
     slideio::GDALImageDriver driver;
     EXPECT_TRUE(driver.canOpenFile("abc.png"));
     EXPECT_FALSE(driver.canOpenFile("abc.svs"));
 }
 
-TEST(GDALDriverTest, openPngFile_3chnls_8bit)
+TEST(Slideio_GDALDriver, openPngFile_3chnls_8bit)
 {
     slideio::GDALImageDriver driver;
     std::string path = TestTools::getTestImagePath("gdal","img_2448x2448_3x8bit_SRC_RGB_ducks.png");
@@ -44,7 +44,7 @@ TEST(GDALDriverTest, openPngFile_3chnls_8bit)
     EXPECT_EQ(res.y, 0.);
 }
 
-TEST(GDALDriverTest, openPngFile_1chnl_8bit)
+TEST(Slideio_GDALDriver, openPngFile_1chnl_8bit)
 {
     slideio::GDALImageDriver driver;
     std::string path = TestTools::getTestImagePath("gdal","img_2448x2448_1x8bit_SRC_GRAY_ducks.png");
@@ -67,7 +67,7 @@ TEST(GDALDriverTest, openPngFile_1chnl_8bit)
     EXPECT_EQ(res.y, 0.);
 }
 
-TEST(GDALDriverTest, openPngFile_3chnl_16bit)
+TEST(Slideio_GDALDriver, openPngFile_3chnl_16bit)
 {
     slideio::GDALImageDriver driver;
     std::string path = TestTools::getTestImagePath("gdal","img_2448x2448_3x16bit_SRC_RGB_ducks.png");
@@ -92,7 +92,7 @@ TEST(GDALDriverTest, openPngFile_3chnl_16bit)
     EXPECT_EQ(res.y, 0.);
 }
 
-TEST(GDALDriverTest, openJpegFile_3chnl_8bit)
+TEST(Slideio_GDALDriver, openJpegFile_3chnl_8bit)
 {
     slideio::GDALImageDriver driver;
     std::string path = TestTools::getTestImagePath("gdal","Airbus_Pleiades_50cm_8bit_RGB_Yogyakarta.jpg");
@@ -117,7 +117,7 @@ TEST(GDALDriverTest, openJpegFile_3chnl_8bit)
     EXPECT_EQ(res.y, 0.);
 }
 
-TEST(GDALDriverTest, readBlockPng)
+TEST(Slideio_GDALDriver, readBlockPng)
 {
     slideio::GDALImageDriver driver;
     std::string path = TestTools::getTestImagePath("gdal","img_1024x600_3x8bit_RGB_color_bars_CMYKWRGB.png");
@@ -158,7 +158,7 @@ TEST(GDALDriverTest, readBlockPng)
     EXPECT_EQ(channelStddev[0], 0);
 }
 
-TEST(GDALDriverTest, readBlockPngResampling)
+TEST(Slideio_GDALDriver, readBlockPngResampling)
 {
     slideio::GDALImageDriver driver;
     std::string path = TestTools::getTestImagePath("gdal","img_1024x600_3x8bit_RGB_color_bars_CMYKWRGB.png");
