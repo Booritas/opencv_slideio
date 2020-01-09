@@ -27,9 +27,12 @@ namespace cv
             std::string getFilePath() const override;
             cv::Ptr<Scene> getScene(int index) const override;
             double getMagnification() const { return m_magnification; }
-            Resolution getResolution() const { return { m_resX, m_resY }; }
+            Resolution getResolution() const { return m_res; }
+            double getZSliceResolution() const {return m_resZ;}
+            double getTFrameResolution() const {return m_resT;}
             const CZIChannelInfos& getChannelInfo() const { return m_channels; }
-            const std::string& getTitle() const { return m_title; };
+            const std::string& getTitle() const { return m_title; }
+            void readPlane(const int64_t offset, const int plane_size, cv::Mat& raster);;
         private:
             void init();
             void readMetadata();
@@ -59,9 +62,9 @@ namespace cv
             int m_slideBs{};
             int m_slideVs{};
             double m_magnification{};
-            double m_resX{};
-            double m_resY{};
+            Resolution m_res{};
             double m_resZ{};
+            double m_resT{};
             CZIChannelInfos m_channels;
             std::string m_title;
         };

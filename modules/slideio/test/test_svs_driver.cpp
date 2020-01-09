@@ -37,10 +37,10 @@ TEST(Slideio_SVSImageDriver, openFile_BrightField)
     std::shared_ptr<slideio::Scene> scene = slide->getScene(0);
     ASSERT_TRUE(scene!=nullptr);
     EXPECT_EQ(slide->getFilePath(),path);
-    EXPECT_EQ(scene->getScenePath(),path);
+    EXPECT_EQ(scene->getFilePath(),path);
     int channels = scene->getNumChannels();
     EXPECT_EQ(channels, 3);
-    cv::Rect sceneRect = scene->getSceneRect();
+    cv::Rect sceneRect = scene->getRect();
     EXPECT_EQ(sceneRect.width, 2220);
     EXPECT_EQ(sceneRect.height, 2967);
     EXPECT_EQ(scene->getChannelDataType(0), slideio::DataType::DT_Byte);
@@ -64,7 +64,7 @@ TEST(Slideio_SVSImageDriver, read_Thumbnail_WholeImage)
     ASSERT_TRUE(numbScenes==4);
     std::shared_ptr<slideio::Scene> scene = slide->getScene(1);
     ASSERT_TRUE(scene!=nullptr);
-    cv::Rect sceneRect = scene->getSceneRect();
+    cv::Rect sceneRect = scene->getRect();
     cv::Mat imageRaster;
     scene->readBlock(sceneRect, imageRaster);
     
@@ -91,7 +91,7 @@ TEST(Slideio_SVSImageDriver, read_Thumbnail_Block)
     ASSERT_TRUE(numbScenes==4);
     std::shared_ptr<slideio::Scene> scene = slide->getScene(1);
     ASSERT_TRUE(scene!=nullptr);
-    cv::Rect sceneRect = scene->getSceneRect();
+    cv::Rect sceneRect = scene->getRect();
     int block_sx = sceneRect.width/4;
     int block_sy = sceneRect.height/3;
     int block_x = sceneRect.width/6;
@@ -127,7 +127,7 @@ TEST(Slideio_SVSImageDriver, read_Thumbnail_BlockWithScale)
     ASSERT_TRUE(numbScenes == 4);
     std::shared_ptr<slideio::Scene> scene = slide->getScene(1);
     ASSERT_TRUE(scene != nullptr);
-    cv::Rect sceneRect = scene->getSceneRect();
+    cv::Rect sceneRect = scene->getRect();
     int block_sx = sceneRect.width/3;
     int block_sy = sceneRect.height/2;
     int block_x = sceneRect.width/6;
@@ -175,7 +175,7 @@ TEST(Slideio_SVSImageDriver, findZoomDirectory)
     }
     slideio::SVSTiledScene scene("path", "name", dirs, nullptr);
     auto& lastDir = dirs[dirs.size()-1];
-    const cv::Rect sceneRect = scene.getSceneRect();
+    const cv::Rect sceneRect = scene.getRect();
     double lastZoom = static_cast<double>(lastDir.width) / static_cast<double>(sceneRect.width);
 
     EXPECT_EQ(scene.findZoomDirectory(2.).dirIndex, 0);
@@ -202,7 +202,7 @@ TEST(Slideio_SVSImageDriver, readBlock_WholeImage)
     ASSERT_TRUE(numbScenes == 4);
     std::shared_ptr<slideio::Scene> scene = slide->getScene(0);
     ASSERT_TRUE(scene != nullptr);
-    const cv::Rect sceneRect = scene->getSceneRect();
+    const cv::Rect sceneRect = scene->getRect();
     ASSERT_EQ(sceneRect.width, 2220);
     ASSERT_EQ(sceneRect.height, 2967);
     cv::Mat sceneRaster;
@@ -234,7 +234,7 @@ TEST(Slideio_SVSImageDriver, readBlock_Part)
     ASSERT_TRUE(numbScenes == 4);
     std::shared_ptr<slideio::Scene> scene = slide->getScene(0);
     ASSERT_TRUE(scene != nullptr);
-    const cv::Rect sceneRect = scene->getSceneRect();
+    const cv::Rect sceneRect = scene->getRect();
     ASSERT_EQ(sceneRect.width, 2220);
     ASSERT_EQ(sceneRect.height, 2967);
     cv::Mat blockRaster;
@@ -263,7 +263,7 @@ TEST(Slideio_SVSImageDriver, readBlock_PartScale)
     ASSERT_TRUE(numbScenes == 4);
     std::shared_ptr<slideio::Scene> scene = slide->getScene(0);
     ASSERT_TRUE(scene != nullptr);
-    const cv::Rect sceneRect = scene->getSceneRect();
+    const cv::Rect sceneRect = scene->getRect();
     ASSERT_EQ(sceneRect.width, 2220);
     ASSERT_EQ(sceneRect.height, 2967);
     cv::Mat blockRaster;
@@ -306,7 +306,7 @@ TEST(Slideio_SVSImageDriver, readBlock_PartScale)
 //    ASSERT_TRUE(numbScenes == 4);
 //    std::shared_ptr<slideio::Scene> scene = slide->getScene(0);
 //    ASSERT_TRUE(scene != nullptr);
-//    const cv::Rect sceneRect = scene->getSceneRect();
+//    const cv::Rect sceneRect = scene->getRect();
 //    cv::Mat blockRaster;
 //    cv::Size blockSize = { sceneRect.width /3, sceneRect.height / 3};
 //    cv::Mat image;

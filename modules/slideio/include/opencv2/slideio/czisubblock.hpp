@@ -25,7 +25,7 @@ namespace cv
             int firstScene() const { return firstDimensionIndex(m_sceneIndex); }
             int lastScene() const { return lastDimensionIndex(m_sceneIndex); }
             int firstIllumination() const { return firstDimensionIndex(m_illuminationIndex); }
-            int lastIlluminarion() const { return lastDimensionIndex(m_illuminationIndex); }
+            int lastIllumination() const { return lastDimensionIndex(m_illuminationIndex); }
             int firstRotation() const { return firstDimensionIndex(m_rotationIndex); }
             int lastRotation() const { return lastDimensionIndex(m_rotationIndex); }
             int firstBAccusition() const { return firstDimensionIndex(m_bAccusitionIndex); }
@@ -38,9 +38,10 @@ namespace cv
             const cv::Rect& rect() const { return m_rect; }
             int cziPixelType() const { return m_pixelType; }
             int64_t computeFileOffset(int channel, int z, int t, int r, int s, int i, int b, int h, int v) const;
-            void setupBlock(const DirectoryEntryDV& directoryHeader, std::vector<DimensionEntryDV>& dimensions);
+            void setupBlock(const SubBlockHeader& subblockHeader, std::vector<DimensionEntryDV>& dimensions);
             bool isInBlock(int channel, int z, int t, int r, int s, int i, int b, int h, int v) const;
             int pixelSize() const { return m_pixelSize; }
+            int planeSize() const {return m_planeSize;}
             const std::vector<Dimension>& dimensions() const {return m_dimensions;}
         private:
             int firstDimensionIndex(int dimension) const
@@ -61,6 +62,8 @@ namespace cv
             int32_t m_pixelSize;
             int32_t m_planeSize;
             int64_t m_filePosition;
+            int64_t m_dataPosition;
+            int64_t m_dataSize;
             int32_t m_filePart;
             int32_t m_compression;
             int m_channelIndex;

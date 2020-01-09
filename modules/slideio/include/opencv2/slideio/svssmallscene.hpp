@@ -19,7 +19,7 @@ namespace cv
                 const std::string& name,
                 const slideio::TiffDirectory& dir,
                 TIFF* hfile);
-            cv::Rect getSceneRect() const override;
+            cv::Rect getRect() const override;
             int getNumChannels() const override;
             slideio::DataType getChannelDataType(int channel) const override;
             slideio::Resolution getResolution() const override;

@@ -24,7 +24,7 @@ slideio::GDALScene::~GDALScene()
     m_hFile = nullptr;
 }
 
-std::string slideio::GDALScene::getScenePath() const
+std::string slideio::GDALScene::getFilePath() const
 {
     return m_filePath;
 }
@@ -115,7 +115,7 @@ std::string slideio::GDALScene::getName() const
     return std::string();
 }
 
-cv::Rect slideio::GDALScene::getSceneRect() const
+cv::Rect slideio::GDALScene::getRect() const
 {
     if (m_hFile == nullptr)
         throw std::runtime_error("GDALDriver: Invalid file header by scene size query");

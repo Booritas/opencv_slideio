@@ -59,10 +59,18 @@ namespace cv
             float startCoordinate;
             int32_t storedSize;
         };
+        struct SubBlockHeader
+        {
+            int32_t metadataSize;
+            int32_t attachmentSize;
+            int64_t dataSize;
+            DirectoryEntryDV direEntry;
+        };
         #pragma pack(pop)
         struct CZIChannelInfo
         {
             std::string id;
+            std::string name;
         };
         typedef std::vector<CZIChannelInfo> CZIChannelInfos;
         struct Dimension

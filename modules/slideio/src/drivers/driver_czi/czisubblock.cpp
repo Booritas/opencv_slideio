@@ -13,7 +13,7 @@ bool cv::slideio::CZISubBlock::isInBlock(int channel, int z, int t, int r, int s
         (t >= firstTFrame() && t <= lastTFrame()) &&
         (r >= firstRotation() && r <= lastRotation()) &&
         (s >= firstScene() && s <= lastScene()) &&
-        (i >= firstIllumination() && s <= lastIlluminarion()) &&
+        (i >= firstIllumination() && s <= lastIllumination()) &&
         (b >= firstBAccusition() && b <= lastBAccusition()) &&
         (h >= firstHPhase() && h <= lastHPhase()) &&
         (v >= firstView() && h <= lastView());
@@ -21,7 +21,7 @@ bool cv::slideio::CZISubBlock::isInBlock(int channel, int z, int t, int r, int s
 }
 
 cv::slideio::CZISubBlock::CZISubBlock() : m_pixelType(0), m_pixelSize(1), m_planeSize(0), m_filePosition(-1),
-                                         m_filePart(-1), m_compression(-1),
+                                         m_dataPosition(-1), m_dataSize(0), m_filePart(-1), m_compression(-1),
                                          m_channelIndex(0), m_zSliceIndex(-1), m_tFrameIndex(-1),
                                          m_illuminationIndex(-1),
                                          m_bAccusitionIndex(-1), m_rotationIndex(-1), m_sceneIndex(-1),
@@ -82,7 +82,7 @@ int64_t cv::slideio::CZISubBlock::computeFileOffset(int channel, int z, int t, i
                 (boost::format("CZIImageDriver: Unknown dimension: %1%") % dim.type).str());
         }
     }
-    const int64_t offset = m_filePosition +
+    const int64_t offset = m_dataPosition +
         (channel - firstChannel()) * channelSize +
         (z - firstZSlice()) * zSize +
         (t - firstTFrame()) * tSize +
@@ -95,17 +95,21 @@ int64_t cv::slideio::CZISubBlock::computeFileOffset(int channel, int z, int t, i
     return offset;
 }
 
-void cv::slideio::CZISubBlock::setupBlock(const DirectoryEntryDV& entryHeader, std::vector<DimensionEntryDV>& dimensionEntries)
+void cv::slideio::CZISubBlock::setupBlock(const SubBlockHeader& subblockHeader, std::vector<DimensionEntryDV>& dimensionEntries)
 {
+    const DirectoryEntryDV& entryHeader = subblockHeader.direEntry;
     m_filePosition = entryHeader.filePosition;
     m_compression = entryHeader.compression;
     m_filePart = entryHeader.filePart;
     m_pixelType = entryHeader.pixelType;
+    m_dataSize = subblockHeader.dataSize;
     m_dimensions.reserve(entryHeader.dimensionCount);
+    uint64_t subblockHeaderSize = sizeof(SubBlockHeader) + sizeof(DimensionEntryDV)*entryHeader.dimensionCount;
+    subblockHeaderSize = std::max((uint64_t)256, subblockHeaderSize);
+    m_dataPosition = m_filePosition + sizeof(SegmentHeader) + subblockHeader.metadataSize + subblockHeaderSize;
     DataType dt;
     int numComponents;
     CZIScene::channelComponentInfo(static_cast<CZIDataType>(m_pixelType), dt, numComponents, m_pixelSize);
-    m_planeSize = m_pixelSize * m_rect.width * m_rect.height;
     for (int dim = 0; dim < entryHeader.dimensionCount; ++dim)
     {
         const DimensionEntryDV& dimEntry = dimensionEntries[dim];
@@ -162,4 +166,5 @@ void cv::slideio::CZISubBlock::setupBlock(const DirectoryEntryDV& entryHeader, s
             m_dimensions.push_back(dimension);
         }
     }
+    m_planeSize = m_pixelSize * m_rect.width * m_rect.height;
 }

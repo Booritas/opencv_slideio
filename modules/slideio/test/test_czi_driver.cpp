@@ -40,7 +40,7 @@ TEST(Slideio_CZIImageDriver, openFile)
     ASSERT_EQ(numScenes, 1);
     auto scene = slide->getScene(0);
     ASSERT_FALSE(scene == nullptr);
-    auto sceneRect = scene->getSceneRect();
+    auto sceneRect = scene->getRect();
     EXPECT_EQ(sceneRect.x, 0);
     EXPECT_EQ(sceneRect.y, 0);
     EXPECT_EQ(sceneRect.width, 512);
@@ -68,7 +68,7 @@ TEST(Slideio_CZIImageDriver, openFile2)
     ASSERT_EQ(numScenes, 1);
     auto scene = slide->getScene(0);
     ASSERT_FALSE(scene == nullptr);
-    auto sceneRect = scene->getSceneRect();
+    auto sceneRect = scene->getRect();
     EXPECT_EQ(sceneRect.x, 0);
     EXPECT_EQ(sceneRect.y, 0);
     EXPECT_EQ(sceneRect.width, 1000);
@@ -87,6 +87,66 @@ TEST(Slideio_CZIImageDriver, openFile2)
     EXPECT_STREQ(scene->getChannelName(2).c_str(), "664");
     std::string sceneName = scene->getName();
     int a = 0;
+}
+
+TEST(Slideio_CZIImageDriver, readBlock)
+{
+    slideio::CZIImageDriver driver;
+    std::string filePath = TestTools::getTestImagePath("czi","pJP31mCherry.czi");
+    cv::Ptr<slideio::Slide> slide = driver.openFile(filePath);
+    ASSERT_TRUE(slide!=nullptr);
+    int numScenes = slide->getNumbScenes();
+    ASSERT_EQ(numScenes, 1);
+    auto scene = slide->getScene(0);
+    ASSERT_FALSE(scene == nullptr);
+    auto sceneRect = scene->getRect();
+    cv::Mat raster;
+    std::vector<int> channelIndices = {0,1,2};
+    scene->readBlockChannels(sceneRect,channelIndices,raster);
+    namedWindow( "Display window", WINDOW_AUTOSIZE );
+    imshow( "Display window", raster);
+    waitKey(0);
+}
+
+TEST(Slideio_CZIImageDriver, readBlock2)
+{
+    slideio::CZIImageDriver driver;
+    std::string filePath = TestTools::getTestImagePath("czi","03_15_2019_DSGN0549_C_fov_9_633.czi");
+    cv::Ptr<slideio::Slide> slide = driver.openFile(filePath);
+    ASSERT_TRUE(slide!=nullptr);
+    int numScenes = slide->getNumbScenes();
+    auto scene = slide->getScene(0);
+    ASSERT_FALSE(scene == nullptr);
+    auto sceneRect = scene->getRect();
+    cv::Mat raster;
+    std::vector<int> channelIndices = {0,1,2};
+    scene->readBlockChannels(sceneRect,channelIndices,raster);
+    namedWindow( "Display window", WINDOW_AUTOSIZE );
+    imshow( "Display window", raster);
+    waitKey(0);
+}
+
+    TEST(Slideio_CZIImageDriver, openFile3)
+{
+    slideio::CZIImageDriver driver;
+    std::string filePath = TestTools::getTestImagePath("czi", "test3.czi");
+    cv::Ptr<slideio::Slide> slide = driver.openFile(filePath);
+    ASSERT_TRUE(slide != nullptr);
+    int numScenes = slide->getNumbScenes();
+    ASSERT_EQ(numScenes, 3);
+    for(int sceneIndex=0; sceneIndex<numScenes; ++sceneIndex)
+    {
+        auto scene = slide->getScene(sceneIndex);
+        ASSERT_FALSE(scene == nullptr);
+        auto sceneRect = scene->getRect();
+        int numChannels = scene->getNumChannels();
+        auto sceneName = scene->getName();
+        for (int channel = 0; channel < numChannels; ++channel)
+        {
+            auto dt = scene->getChannelDataType(channel);
+            auto name = scene->getChannelName(channel);
+        }
+    }
 }
 
 TEST(Slideio_CZIImageDriver, sceneId)

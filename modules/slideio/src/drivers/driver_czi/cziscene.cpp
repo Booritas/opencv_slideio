@@ -23,16 +23,16 @@ public:
     }
 };
 
-CZIScene::CZIScene() : m_slide(nullptr)
+CZIScene::CZIScene() : m_slide(nullptr), m_numZSlices(1), m_numTFrames(1)
 {
 }
 
-std::string CZIScene::getScenePath() const
+std::string CZIScene::getFilePath() const
 {
     return m_filePath;
 }
 
-cv::Rect CZIScene::getSceneRect() const
+cv::Rect CZIScene::getRect() const
 {
     return m_sceneRect;
 }
@@ -40,6 +40,26 @@ cv::Rect CZIScene::getSceneRect() const
 int CZIScene::getNumChannels() const
 {
     return static_cast<int>(m_componentInfos.size());
+}
+
+int CZIScene::getNumZSlices() const
+{
+    return m_numZSlices;
+}
+
+int CZIScene::getNumTFrames() const
+{
+    return m_numTFrames;
+}
+
+double CZIScene::getZSliceResolution() const
+{
+    return m_slide->getZSliceResolution();
+}
+
+double CZIScene::getTFrameResolution() const
+{
+    return getTFrameResolution();
 }
 
 cv::slideio::DataType CZIScene::getChannelDataType(int channel) const
@@ -75,7 +95,7 @@ double CZIScene::getMagnification() const
 void CZIScene::readResampledBlockChannels(const cv::Rect& blockRect, const cv::Size& blockSize,
     const std::vector<int>& componentIndices, cv::OutputArray output)
 {
-    TilerData userData = { 0 };
+    TilerData userData;
     const double zoomX = static_cast<double>(blockSize.width) / static_cast<double>(blockRect.width);
     const double zoomY = static_cast<double>(blockSize.height) / static_cast<double>(blockRect.width);
     const double zoom = std::max(zoomX, zoomY);
@@ -108,6 +128,77 @@ void CZIScene::generateSceneName()
         % m_sceneParams.rotationIndex
         % m_sceneParams.bAccusitionIndex).str();
 }
+
+void CZIScene::computeSceneRect()
+{
+    // compute scene rectangle
+    const CZIScene::ZoomLevel& zoomLevelMax = CZIScene::getBaseZoomLevel();
+    m_sceneRect = { 0,0,0,0 };
+    const Tiles& tiles = zoomLevelMax.tiles;
+    const Blocks& tileBlocks = zoomLevelMax.blocks;
+    for(size_t index = 0; index<tiles.size(); index++)
+    {
+        int blockIndex = tiles[index].blockIndices[0];
+        const CZISubBlock& block = tileBlocks[blockIndex];
+        const cv::Rect& tileRect = block.rect();
+        m_sceneRect |= tileRect;
+    }
+}
+
+void CZIScene::computeSceneTiles()
+{
+    // combine zoom level blocks in tiles
+    for(auto& zoomLevel: m_zoomLevels)
+    {
+        combineBlockInTiles(zoomLevel);
+    }
+}
+
+void CZIScene::compute4DParameters()
+{
+    const CZIScene::ZoomLevel& zoomLevelMax = CZIScene::getBaseZoomLevel();
+    auto blocks = zoomLevelMax.blocks;
+    int firstZSlice(0), lastZSlice(0), firstTFrame(0), lastTFrame(0);
+    for(size_t blockIndex=0; blockIndex<blocks.size(); ++blockIndex)
+    {
+        const slideio::CZISubBlock& block = blocks[blockIndex];
+        if(blockIndex==0)
+        {
+            firstTFrame = block.firstTFrame();
+            lastTFrame = block.lastTFrame();
+            firstZSlice = block.firstZSlice();
+            lastZSlice = block.lastZSlice();
+        }
+        firstTFrame = std::min(firstTFrame, block.firstTFrame());
+        lastTFrame = std::max(lastTFrame, block.lastTFrame());
+        firstZSlice = std::min(firstZSlice, block.firstZSlice());
+        lastZSlice = std::max(lastZSlice, block.lastZSlice());
+    }
+    if(firstZSlice>0 || firstTFrame>0)
+    {
+        throw std::runtime_error(
+            (boost::format("CZIImageDriver: Unexpected 4D configuration: Z:(%1%-%2%) Time:(%3%-%4%)")
+                % firstZSlice
+                % lastZSlice
+                % firstTFrame
+                % lastTFrame).str());
+    }
+    m_numZSlices = lastZSlice + 1;
+    m_numTFrames = lastTFrame + 1;
+}
+
+const CZIScene::ZoomLevel& CZIScene::getBaseZoomLevel() const
+{
+    const ZoomLevel& zoomLevelMax = m_zoomLevels.front();
+    if(abs(zoomLevelMax.zoom-1)>1.e-4)
+    {
+        throw std::runtime_error(
+            (boost::format("CZIImageDriver: unexpected value for max zoom level. Expected: 1, received: %1%") %
+                zoomLevelMax.zoom).str());
+    }
+    return zoomLevelMax;
+}
+
 
 void CZIScene::init(uint64_t sceneId, SceneParams& sceneParams, const std::string& filePath, const Blocks& blocks, CZISlide* slide)
 {
@@ -142,29 +233,9 @@ void CZIScene::init(uint64_t sceneId, SceneParams& sceneParams, const std::strin
     {
         return (abs(left.zoom - right.zoom) > DOUBLE_EPSILON) && (left.zoom > right.zoom);
     });
-    // combine zoom level blocks in tiles
-    for(auto& zoomLevel: m_zoomLevels)
-    {
-        combineBlockInTiles(zoomLevel);
-    }
-    // compute scene rectangle
-    const ZoomLevel& zoomLevelMax = m_zoomLevels.front();
-    if(abs(zoomLevelMax.zoom-1)>1.e-4)
-    {
-        throw std::runtime_error(
-            (boost::format("CZIImageDriver: unexpected value for max zoom level. Expected: 1, received: %1%") %
-                zoomLevelMax.zoom).str());
-    }
-    m_sceneRect = { 0,0,0,0 };
-    const Tiles& tiles = zoomLevelMax.tiles;
-    const Blocks& tileBlocks = zoomLevelMax.blocks;
-    for(size_t index = 0; index<tiles.size(); index++)
-    {
-        int blockIndex = tiles[index].blockIndices[0];
-        const CZISubBlock& block = tileBlocks[blockIndex];
-        const cv::Rect& tileRect = block.rect();
-        m_sceneRect |= tileRect;
-    }
+    computeSceneTiles();
+    computeSceneRect();
+    compute4DParameters();
     generateSceneName();
 }
 
@@ -190,10 +261,48 @@ bool CZIScene::getTileRect(int tileIndex, cv::Rect& tileRect, void* userData)
     return true;
 }
 
-void CZIScene::readBlockChannel(const CZISubBlock& block, int fileChannel, int z, int t, cv::OutputArray output)
+void CZIScene::readBlockChannel(const CZISubBlock& block, int cziChannel, int z, int t, cv::OutputArray output)
 {
     // compute file offset for the channel
-    // const int64_t offset = block.computeFileOffset(fileChannel, z, t, ;
+    const int64_t offset = block.computeFileOffset(
+        cziChannel, z, t,
+        m_sceneParams.rotationIndex,
+        m_sceneParams.sceneIndex,
+        m_sceneParams.illuminationIndex,
+        m_sceneParams.bAccusitionIndex,
+        m_sceneParams.hPhaseIndex,
+        m_sceneParams.viewIndex);
+    const SceneChannelInfo& channelInfo = m_channelInfos[cziChannel];
+    const int planeSize = block.planeSize();
+    const cv::Rect& rectBlock = block.rect();
+    output.create(rectBlock.height, rectBlock.width, CV_MAKETYPE(channelInfo.pixelType, channelInfo.numComponents));
+    cv::Mat mat = output.getMat();
+    m_slide->readPlane(offset, planeSize, mat);
+}
+
+int CZIScene::findBlockIndex(const Tile& tile, const Blocks& blocks, int channelIndex, int zSliceIndex, int tFrameIndex) const
+{
+    for(const auto& blockIndex : tile.blockIndices)
+    {
+        const CZISubBlock& block = blocks[blockIndex];
+        if( channelIndex >= block.firstChannel() &&
+            channelIndex <= block.lastChannel() && 
+            zSliceIndex >= block.firstZSlice() &&
+            zSliceIndex <= block.lastZSlice() &&
+            tFrameIndex <= block.firstTFrame() &&
+            tFrameIndex >= block.lastTFrame())
+        {
+            // block found
+            return blockIndex;
+        }
+    }
+    throw std::runtime_error(
+        (boost::format("CZIImageDriver: Cannot find sub-block (c:%1%, z:%2%, t:%3%) of file %4%") 
+            % channelIndex 
+            % zSliceIndex 
+            % tFrameIndex 
+            % m_filePath).str()
+    );
 }
 
 bool CZIScene::readTile(int tileIndex, const std::vector<int>& componentIndices, cv::OutputArray tileRaster,
@@ -206,53 +315,37 @@ bool CZIScene::readTile(int tileIndex, const std::vector<int>& componentIndices,
     const Tile& tile = tiles[tileIndex];
     const Blocks& blocks = zoomLevel.blocks;
 
-    std::vector<int> channels(componentIndices);
-    if(channels.empty())
+    std::vector<int> components(componentIndices);
+    if(components.empty())
     {
-        const int numChannels = getNumChannels();
-        channels.reserve(numChannels);
-        for(int channel=0; channel<numChannels; ++channel)
+        const int numComponents = getNumChannels();
+        components.reserve(numComponents);
+        for(int componentIndex=0; componentIndex<numComponents; ++componentIndex)
         {
-            channels.push_back(channel);
+            components.push_back(componentIndex);
         }
     }
-    std::map<int, cv::Mat> fileChannelRasters;
-    std::vector<cv::Mat> imageChannelRasters;
+    std::map<int, cv::Mat> channelRasters;
+    std::vector<cv::Mat> componentRasters;
 
-
-    for(int channelIndex=0; channelIndex<channels.size(); ++channelIndex)
+    for(int index=0; index < static_cast<int>(components.size()); ++index)
     {
-        auto fileChannels = m_componentToChannelIndex[channelIndex];
-        const int fileChannel = fileChannels.first;
-        const int fileSubchannel = fileChannels.second;
+        int componentIndex = components[index];
+        auto channelIndices = m_componentToChannelIndex[componentIndex];
+        const int channelIndex = channelIndices.first;
+        const int channelComponentIndex = channelIndices.second;
         // find block for the file channel
-        int channelBlockIndex = -1;
-        for(const auto& blockIndex : tile.blockIndices)
-        {
-            const CZISubBlock& block = blocks[blockIndex];
-            if(fileChannel>=block.firstChannel() && fileChannel<=block.lastChannel())
-            {
-                // block found
-                channelBlockIndex = blockIndex;
-                break;
-            }
-        }
-        if(channelBlockIndex<0)
-        {
-            throw std::runtime_error(
-                (boost::format("CZIImageDriver: Cannot find sub-block for the channel %1% of file %2%") % channelIndex % m_filePath).str()
-            );
-        }
+        int blockIndex = findBlockIndex(tile, blocks, channelIndex, tilerData->zSliceIndex, tilerData->zSliceIndex);
         cv::Mat channelRaster;
-        auto channelRasterIt = fileChannelRasters.find(fileChannel);
-        if(channelRasterIt==fileChannelRasters.end())
+        auto channelRasterIt = channelRasters.find(channelIndex);
+        if(channelRasterIt==channelRasters.end())
         {
-            readBlockChannel(blocks[channelBlockIndex], 
-                fileChannel,
+            readBlockChannel(blocks[blockIndex], 
+                channelIndex,
                 tilerData->zSliceIndex,
                 tilerData->tFrameIndex,
                 channelRaster);
-            fileChannelRasters[fileChannel] = channelRaster;
+            channelRasters[channelIndex] = channelRaster;
         }
         else
         {
@@ -260,22 +353,35 @@ bool CZIScene::readTile(int tileIndex, const std::vector<int>& componentIndices,
         }
         if(channelRaster.channels()>1)
         {
-            if(fileSubchannel>=channelRaster.channels())
+            if(channelComponentIndex>=channelRaster.channels())
             {
                 throw std::runtime_error(
                     (boost::format("CZIImageDriver: Unexpected channel index %1% (of %2% ) for sub-block file %3%")
-                        % fileSubchannel % channelRaster.channels() % m_filePath).str()
+                        % channelComponentIndex % channelRaster.channels() % m_filePath).str()
                 );
             }
             cv::Mat singleChannelRaster;
-            cv::extractChannel(channelRaster, singleChannelRaster, fileSubchannel);
-            imageChannelRasters.push_back(singleChannelRaster);
+            cv::extractChannel(channelRaster, singleChannelRaster, channelComponentIndex);
+            componentRasters.push_back(singleChannelRaster);
         }
         else
         {
-            imageChannelRasters.push_back(channelRaster);
+            componentRasters.push_back(channelRaster);
         }
-        cv::merge(imageChannelRasters, tileRaster);
+    }
+    if(componentRasters.size()>1)
+    {
+        cv::merge(componentRasters, tileRaster);
+    }
+    else if(componentRasters.size()==1)
+    {
+        componentRasters[0].copyTo(tileRaster);
+    }
+    else
+    {
+        throw std::runtime_error(
+            (boost::format("CZIImageDriver: Cannot find raster for tile %1%") % tileIndex).str()
+        );
     }
     return true;
 }
@@ -309,8 +415,6 @@ void CZIScene::combineBlockInTiles(ZoomLevel& zoomLevel)
 void CZIScene::channelComponentInfo(CZIDataType channelCZIDataType, DataType& componentType, int& numComponents,
     int& pixelSize)
 {
-    int blockComponents;
-    DataType dt = DataType::DT_Unknown;
     switch (channelCZIDataType)
     {
     case Gray8:
@@ -371,7 +475,7 @@ void CZIScene::setupComponents(const std::map<int, int>& channelPixelType)
     int sceneComponentIndex = 0;
     const CZIChannelInfos& fileChannelInfo = m_slide->getChannelInfo();
     m_channelInfos.resize(fileChannelInfo.size());
-    for(auto channelIndex=0; channelIndex<fileChannelInfo.size(); ++channelIndex)
+    for(int channelIndex=0; channelIndex < static_cast<int>(fileChannelInfo.size()); ++channelIndex)
     {
         m_channelInfos[channelIndex].name = fileChannelInfo[channelIndex].id;
     }
@@ -387,15 +491,19 @@ void CZIScene::setupComponents(const std::map<int, int>& channelPixelType)
             m_componentInfos.emplace_back();
             auto& componentInfo = m_componentInfos.back();
             componentInfo.dataType = channelInfo.componentType;
-            if(channelIndex<fileChannelInfo.size())
+            std::string channelName = fileChannelInfo[channelIndex].name;
+            if(channelName.empty())
+                channelName = fileChannelInfo[channelIndex].id;
+
+            if(channelIndex<static_cast<int>(fileChannelInfo.size()))
             {
                 if(channelInfo.numComponents ==1)
                 {
-                    componentInfo.name = fileChannelInfo[channelIndex].id;
+                    componentInfo.name = channelName;
                 }
                 else
                 {
-                    componentInfo.name = (boost::format("%1%:%2%") % fileChannelInfo[channelIndex].id % (blockComponentIndex+1)).str();
+                    componentInfo.name = (boost::format("%1%:%2%") % channelName % (blockComponentIndex+1)).str();
                 }
             }
         }
@@ -430,6 +538,7 @@ uint64_t CZIScene::sceneIdFromDims(const std::vector<Dimension>& dims)
         case 'H': h = dim.start; break;
         case 'R': r = dim.start; break;
         case 'B': b = dim.start; break;
+        default: break;
         }
     }
     return sceneIdFromDims(s, i, v, h, r, b);
@@ -457,7 +566,7 @@ static void extractSceneIds(const std::vector<Dimension>& dims, const std::map<c
     for(int index=startIndex; index<stopIndex; ++index)
     {
         dimensionValues[curDim] = index;
-        if(nextDim<dims.size())
+        if(nextDim < static_cast<int>(dims.size()))
         {
             extractSceneIds(dims, dimensionIndices, dimensionValues, nextDim, sceneIds);
         }
@@ -479,7 +588,7 @@ static void extractSceneIds(const std::vector<Dimension>& dims, const std::map<c
 void CZIScene::sceneIdsFromDims(const std::vector<Dimension>& dims, std::vector<uint64_t>& ids)
 {
     std::map<char, int> dimensionIndices;
-    for(auto dim=0; dim<dims.size(); ++dim)
+    for(int dim=0; dim < static_cast<int>(dims.size()); ++dim)
     {
         dimensionIndices[dims[dim].type] = dim;
     }
