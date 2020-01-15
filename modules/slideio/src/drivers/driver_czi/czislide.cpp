@@ -75,10 +75,12 @@ cv::Ptr<Scene> CZISlide::getScene(int index) const
 	return m_scenes[index];
 }
 
-void CZISlide::readPlane(const int64_t offset, const int planeSize, cv::Mat& raster)
+
+void CZISlide::readBlock(uint64_t pos, uint64_t size, std::vector<unsigned char>& data)
 {
-    m_fileStream.seekg(offset);
-    m_fileStream.read((char*)raster.data, planeSize);
+    data.resize(size);
+    m_fileStream.seekg(pos);
+    m_fileStream.read((char*)data.data(), size);
 }
 
 void CZISlide::init()
@@ -237,7 +239,7 @@ void CZISlide::readDirectory()
     }
     DirectoryHeader directoryHeader{};
     m_fileStream.read(reinterpret_cast<char*>(&directoryHeader), sizeof(directoryHeader));
-    std::vector<Blocks> sceneBlocks;
+    std::vector<CZISubBlocks> sceneBlocks;
     std::vector<uint64_t> sceneIds;
     std::map<uint64_t, int> sceneMap;
     auto filePos = m_fileStream.tellg();
@@ -284,7 +286,7 @@ void CZISlide::readDirectory()
     for(size_t sceneIndex = 0; sceneIndex < sceneBlocks.size(); ++sceneIndex)
     {
         const uint64_t sceneId = sceneIds[sceneIndex];
-        const Blocks& blocks = sceneBlocks[sceneIndex];
+        const CZISubBlocks& blocks = sceneBlocks[sceneIndex];
         CZIScene::SceneParams params{};
         cv::Ptr<CZIScene> scene(new CZIScene);
         CZIScene::dimsFromSceneId(sceneId, params);

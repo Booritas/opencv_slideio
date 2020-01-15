@@ -35,7 +35,7 @@ namespace cv
             struct ZoomLevel
             {
                 double zoom;
-                Blocks blocks;
+                CZISubBlocks blocks;
                 Tiles tiles;
             };
             struct ComponentInfo
@@ -48,6 +48,7 @@ namespace cv
                 std::string name;
                 int32_t pixelType;
                 int32_t pixelSize;
+                int32_t firstComponent;
                 int32_t numComponents;
                 DataType componentType;
             };
@@ -74,11 +75,10 @@ namespace cv
             void readResampledBlockChannels(const cv::Rect& blockRect, const cv::Size& blockSize,
                 const std::vector<int>& componentIndices, cv::OutputArray output) override;
             std::string getName() const override;
-            void init(uint64_t sceneId, SceneParams& sceneParams, const std::string& filePath, const Blocks& blocks, CZISlide* slide);
+            void init(uint64_t sceneId, SceneParams& sceneParams, const std::string& filePath, const CZISubBlocks& blocks, CZISlide* slide);
             // interface Tiler implementaton
             int getTileCount(void* userData) override;
             bool getTileRect(int tileIndex, cv::Rect& tileRect, void* userData) override;
-            void readBlockChannel(const CZISubBlock& block, int cziChannel, int z, int t, cv::OutputArray output);
             bool readTile(int tileIndex, const std::vector<int>& componentIndices, cv::OutputArray tileRaster,
                           void* userData) override;
         private:
@@ -88,7 +88,12 @@ namespace cv
             void computeSceneTiles();
             void compute4DParameters();
             const ZoomLevel& getBaseZoomLevel() const;
-            int findBlockIndex(const Tile& tile, const Blocks& blocks, int channelIndex, int zSliceIndex, int tFrameIndex) const ;
+            int findBlockIndex(const Tile& tile, const CZISubBlocks& blocks, int channelIndex, int zSliceIndex, int tFrameIndex) const ;
+            const Tile& getTile(const TilerData* tilerData, int tileIndex) const;
+            const CZISubBlocks& getBlocks(const TilerData* tilerData) const;
+            bool blockHasData(const CZISubBlock& block, const std::vector<int>& componentIndices, const TilerData* tilerData);
+            static std::vector<uint8_t> decodeData(const CZISubBlock& block, const std::vector<unsigned char>& encodedData);
+            void unpackChannels(const CZISubBlock& block, const std::vector<int>& orgComponentIndices, const std::vector<unsigned char>& blockData, const TilerData* tilerData, std::vector<Mat>& componentRasters);
         public:
             // static members
             static uint64_t sceneIdFromDims(int s, int i, int v, int h, int r, int b);

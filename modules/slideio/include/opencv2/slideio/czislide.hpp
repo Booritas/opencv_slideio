@@ -32,7 +32,7 @@ namespace cv
             double getTFrameResolution() const {return m_resT;}
             const CZIChannelInfos& getChannelInfo() const { return m_channels; }
             const std::string& getTitle() const { return m_title; }
-            void readPlane(const int64_t offset, const int plane_size, cv::Mat& raster);;
+            void readBlock(uint64_t pos, uint64_t size, std::vector<unsigned char>& data);;
         private:
             void init();
             void readMetadata();

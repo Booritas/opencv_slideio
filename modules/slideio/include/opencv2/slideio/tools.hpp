@@ -17,6 +17,19 @@ namespace cv
         {
         public:
             static bool matchPattern(const std::string& path, const std::string& pattern);
+            static std::vector<int> completeChannelList(const std::vector<int>& orgChannelList, int numChannels)
+            {
+                std::vector<int> channelList(orgChannelList);
+                if(channelList.empty())
+                {
+                    channelList.resize(numChannels);
+                    for(int channel=0; channel<numChannels; ++channel)
+                    {
+                        channelList[channel] = channel;
+                    }
+                }
+                return channelList;
+            }
             template <typename Functor>
             static int findZoomLevel(double zoom, int numLevels, Functor zoomFunction)
             {
