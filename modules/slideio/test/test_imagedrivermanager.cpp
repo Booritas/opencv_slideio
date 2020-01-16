@@ -4,13 +4,13 @@
 
 namespace opencv_test {
 
-TEST(ImageDriverManagerTest, getDriverIDs)
+TEST(Slideio_ImageDriverManager, getDriverIDs)
 {
     std::vector<std::string> driverIDs = slideio::ImageDriverManager::getDriverIDs();
     EXPECT_FALSE(driverIDs.empty());
 }
 
-TEST(ImageDriverManagerTest, getDriversGlobal)
+TEST(Slideio_ImageDriverManager, getDriversGlobal)
 {
     auto drivers = slideio::getDrivers();
     EXPECT_FALSE(drivers.empty());

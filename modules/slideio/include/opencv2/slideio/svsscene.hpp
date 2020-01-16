@@ -17,7 +17,7 @@ namespace cv
                 m_filePath(filePath),
                 m_name(name) {
             }
-            std::string getScenePath() const override {
+            std::string getFilePath() const override {
                 return m_filePath;
             }
             std::string getName() const override {

@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <vector>
 #include "czistructs.hpp"
+#include "structs.hpp"
 
 namespace cv
 {
@@ -15,6 +16,13 @@ namespace cv
         class CV_EXPORTS CZISubBlock
         {
         public:
+            enum Compression
+            {
+                Uncompressed = 0,
+                Jpeg = 1,
+                LZW = 2,
+                JpegXR = 4
+            };
             CZISubBlock();
             int firstChannel() const { return firstDimensionIndex(m_channelIndex);}
             int lastChannel() const  { return lastDimensionIndex(m_channelIndex); }
@@ -25,7 +33,7 @@ namespace cv
             int firstScene() const { return firstDimensionIndex(m_sceneIndex); }
             int lastScene() const { return lastDimensionIndex(m_sceneIndex); }
             int firstIllumination() const { return firstDimensionIndex(m_illuminationIndex); }
-            int lastIlluminarion() const { return lastDimensionIndex(m_illuminationIndex); }
+            int lastIllumination() const { return lastDimensionIndex(m_illuminationIndex); }
             int firstRotation() const { return firstDimensionIndex(m_rotationIndex); }
             int lastRotation() const { return lastDimensionIndex(m_rotationIndex); }
             int firstBAccusition() const { return firstDimensionIndex(m_bAccusitionIndex); }
@@ -36,34 +44,41 @@ namespace cv
             int lastView() const { return lastDimensionIndex(m_viewIndex); }
             double zoom() const { return m_zoom; }
             const cv::Rect& rect() const { return m_rect; }
-            int cziPixelType() const { return m_pixelType; }
-            int64_t computeFileOffset(int channel, int z, int t, int r, int s, int i, int b, int h, int v) const;
-            void setupBlock(const DirectoryEntryDV& directoryHeader, std::vector<DimensionEntryDV>& dimensions);
+            int cziPixelType() const { return m_cziPixelType; }
+            int64_t computeDataOffset(int channel, int z, int t, int r, int s, int i, int b, int h, int v) const;
+            void setupBlock(const SubBlockHeader& subblockHeader, std::vector<DimensionEntryDV>& dimensions);
             bool isInBlock(int channel, int z, int t, int r, int s, int i, int b, int h, int v) const;
-            uint64_t sceneId() const { return m_sceneId; }
             int pixelSize() const { return m_pixelSize; }
+            slideio::DataType dataType() const {return m_dataType;};
+            int planeSize() const {return m_planeSize;}
+            uint64_t dataPosition() const {return m_dataPosition;}
+            uint64_t dataSize() const {return m_dataSize;}
+            Compression compression() const {return static_cast<Compression>(m_compression);}
+            const std::vector<Dimension>& dimensions() const {return m_dimensions;}
         private:
             int firstDimensionIndex(int dimension) const
             {
-                if(dimension>0 && dimension<static_cast<int>(m_dimensions.size()))
+                if(dimension>=0 && dimension<static_cast<int>(m_dimensions.size()))
                     return m_dimensions[dimension].start;
                 return 0;
             }
             int lastDimensionIndex(int dimension) const
             {
-                if (dimension > 0 && dimension < static_cast<int>(m_dimensions.size()))
+                if (dimension >= 0 && dimension < static_cast<int>(m_dimensions.size()))
                     return  (m_dimensions[dimension].start + m_dimensions[dimension].size - 1);
                 return 0;
             }
         private:
+            slideio::DataType m_dataType;
             cv::Rect m_rect;
-            int32_t m_pixelType;
+            int32_t m_cziPixelType;
             int32_t m_pixelSize;
             int32_t m_planeSize;
             int64_t m_filePosition;
+            int64_t m_dataPosition;
+            int64_t m_dataSize;
             int32_t m_filePart;
             int32_t m_compression;
-            uint64_t m_sceneId;
             int m_channelIndex;
             int m_zSliceIndex;
             int m_tFrameIndex;
@@ -76,7 +91,7 @@ namespace cv
             double m_zoom;
             std::vector<Dimension> m_dimensions;
         };
-        typedef std::vector<CZISubBlock> Blocks;
+        typedef std::vector<CZISubBlock> CZISubBlocks;
     }
 }
 #endif

@@ -43,7 +43,7 @@ SVSSmallScene::SVSSmallScene(const std::string& filePath,
 }
 
 
-cv::Rect SVSSmallScene::getSceneRect() const
+cv::Rect SVSSmallScene::getRect() const
 {
     cv::Rect rect = { 0,0, m_directory.width, m_directory.height };
     return rect;

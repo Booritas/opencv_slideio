@@ -3,7 +3,7 @@
 
 namespace opencv_test {
 
-TEST(TileCopmposerTest, composeRect)
+TEST(Slideio_TileComposer, composeRect)
 {
     const int tileWidth(100), tileHeight(200), tilesX(6), tilesY(3);
     cv::Scalar white(255, 255, 0), black(0, 255, 255);

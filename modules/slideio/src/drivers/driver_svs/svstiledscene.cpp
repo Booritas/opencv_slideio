@@ -40,7 +40,7 @@ SVSTiledScene::SVSTiledScene(const std::string& filePath,
     m_magnification = SVSTools::extractMagnifiation(dir.description);
 }
 
-cv::Rect SVSTiledScene::getSceneRect() const
+cv::Rect SVSTiledScene::getRect() const
 {
     cv::Rect rect = { 0,0,  m_directories[0].width,  m_directories[0].height };
     return rect;
@@ -86,7 +86,7 @@ void SVSTiledScene::readResampledBlockChannels(const cv::Rect& blockRect, const 
 
 const TiffDirectory& SVSTiledScene::findZoomDirectory(double zoom) const
 {
-    const cv::Rect sceneRect = getSceneRect();
+    const cv::Rect sceneRect = getRect();
     const double sceneWidth = static_cast<double>(sceneRect.width);
     const auto& directories = m_directories;
     int index = Tools::findZoomLevel(zoom, (int)m_directories.size(), [&directories, sceneWidth](int index){

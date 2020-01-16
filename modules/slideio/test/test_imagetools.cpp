@@ -7,7 +7,7 @@
 
 namespace opencv_test {
 
-TEST(ImageToolsTest, readJp2KFile)
+TEST(Slideio_ImageTools, readJp2KFile)
 {
     std::string filePath = TestTools::getTestImagePath("jp2K","relax.jp2");
     std::string bmpFilePath = TestTools::getTestImagePath("jp2K","relax.bmp");
@@ -28,7 +28,7 @@ TEST(ImageToolsTest, readJp2KFile)
     ASSERT_LT(0.99, minScore);
 }
 
-TEST(ImageToolsTest, readGDALImage)
+TEST(Slideio_ImageTools, readGDALImage)
 {
     std::string path = TestTools::getTestImagePath("gdal","img_1024x600_3x8bit_RGB_color_bars_CMYKWRGB.png");
     cv::Mat image;

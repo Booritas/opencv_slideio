@@ -24,7 +24,7 @@ int slideio::GDALSlide::getNumbScenes() const
 std::string slideio::GDALSlide::getFilePath() const
 {
 	if(m_scene!=nullptr)
-		return m_scene->getScenePath();
+		return m_scene->getFilePath();
 	
 	std::string empty_path;
 	return empty_path;

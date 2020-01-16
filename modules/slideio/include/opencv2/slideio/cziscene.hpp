@@ -35,7 +35,7 @@ namespace cv
             struct ZoomLevel
             {
                 double zoom;
-                Blocks blocks;
+                CZISubBlocks blocks;
                 Tiles tiles;
             };
             struct ComponentInfo
@@ -48,6 +48,7 @@ namespace cv
                 std::string name;
                 int32_t pixelType;
                 int32_t pixelSize;
+                int32_t firstComponent;
                 int32_t numComponents;
                 DataType componentType;
             };
@@ -60,9 +61,13 @@ namespace cv
             };
         public:
             CZIScene();
-            std::string getScenePath() const override;
-            cv::Rect getSceneRect() const override;
+            std::string getFilePath() const override;
+            cv::Rect getRect() const override;
             int getNumChannels() const override;
+            int getNumZSlices() const override;
+            int getNumTFrames() const override;
+            double getZSliceResolution() const override;
+            double getTFrameResolution() const override;
             cv::slideio::DataType getChannelDataType(int channel) const override;
             std::string getChannelName(int channel) const override;
             Resolution getResolution() const override;
@@ -70,20 +75,30 @@ namespace cv
             void readResampledBlockChannels(const cv::Rect& blockRect, const cv::Size& blockSize,
                 const std::vector<int>& componentIndices, cv::OutputArray output) override;
             std::string getName() const override;
-            void generateSceneName();
-            void init(SceneParams& sceneParams, const std::string& filePath, const Blocks& blocks, CZISlide* slide);
+            void init(uint64_t sceneId, SceneParams& sceneParams, const std::string& filePath, const CZISubBlocks& blocks, CZISlide* slide);
             // interface Tiler implementaton
             int getTileCount(void* userData) override;
             bool getTileRect(int tileIndex, cv::Rect& tileRect, void* userData) override;
-            void readBlockChannel(const CZISubBlock& block, int fileChannel, int z, int t, cv::OutputArray output);
             bool readTile(int tileIndex, const std::vector<int>& componentIndices, cv::OutputArray tileRaster,
                           void* userData) override;
         private:
             void setupComponents(const std::map<int, int>& channelPixelType);
+            void generateSceneName();
+            void computeSceneRect();
+            void computeSceneTiles();
+            void compute4DParameters();
+            const ZoomLevel& getBaseZoomLevel() const;
+            int findBlockIndex(const Tile& tile, const CZISubBlocks& blocks, int channelIndex, int zSliceIndex, int tFrameIndex) const ;
+            const Tile& getTile(const TilerData* tilerData, int tileIndex) const;
+            const CZISubBlocks& getBlocks(const TilerData* tilerData) const;
+            bool blockHasData(const CZISubBlock& block, const std::vector<int>& componentIndices, const TilerData* tilerData);
+            static std::vector<uint8_t> decodeData(const CZISubBlock& block, const std::vector<unsigned char>& encodedData);
+            void unpackChannels(const CZISubBlock& block, const std::vector<int>& orgComponentIndices, const std::vector<unsigned char>& blockData, const TilerData* tilerData, std::vector<Mat>& componentRasters);
         public:
             // static members
             static uint64_t sceneIdFromDims(int s, int i, int v, int h, int r, int b);
             static uint64_t sceneIdFromDims(const std::vector<Dimension>& dims);
+            static void sceneIdsFromDims(const std::vector<Dimension>& dims, std::vector<uint64_t>& ids);
             static uint64_t sceneIdFromDims(const SceneParams& params);
             static void dimsFromSceneId(uint64_t sceneId, int& s, int& i, int& v, int& h, int& r, int& b);
             static void dimsFromSceneId(uint64_t sceneId, SceneParams& params);
@@ -100,8 +115,10 @@ namespace cv
             std::map<int, std::pair<int, int>> m_componentToChannelIndex;
             CZISlide* m_slide;
             std::string m_name;
-            uint64_t m_id;
-            SceneParams m_sceneParams;
+            uint64_t m_id{};
+            SceneParams m_sceneParams{};
+            int m_numZSlices;
+            int m_numTFrames;
         };
     }
 }

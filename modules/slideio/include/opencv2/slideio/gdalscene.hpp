@@ -21,7 +21,7 @@ namespace cv
             GDALScene(const std::string& filePath);
             GDALScene(GDALDatasetH ds, const std::string& filePath);
             virtual ~GDALScene();
-            std::string getScenePath() const override;
+            std::string getFilePath() const override;
             int getNumChannels() const override;
             slideio::DataType getChannelDataType(int channel) const override;
             slideio::Resolution getResolution() const override;
@@ -30,7 +30,7 @@ namespace cv
             static void closeFile(GDALDatasetH hfile);
             static slideio::DataType dataTypeFromGDALDataType(GDALDataType dt);
             std::string getName() const override;
-            cv::Rect getSceneRect() const override;
+            cv::Rect getRect() const override;
             void readResampledBlockChannels(const cv::Rect& blockRect, const cv::Size& blockSize, const std::vector<int>& channelIndices, cv::OutputArray output) override;
         private:
             GDALDatasetH m_hFile;

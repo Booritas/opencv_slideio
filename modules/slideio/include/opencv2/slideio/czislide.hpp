@@ -27,9 +27,12 @@ namespace cv
             std::string getFilePath() const override;
             cv::Ptr<Scene> getScene(int index) const override;
             double getMagnification() const { return m_magnification; }
-            Resolution getResolution() const { return { m_resX, m_resY }; }
+            Resolution getResolution() const { return m_res; }
+            double getZSliceResolution() const {return m_resZ;}
+            double getTFrameResolution() const {return m_resT;}
             const CZIChannelInfos& getChannelInfo() const { return m_channels; }
-            const std::string& getTitle() const { return m_title; };
+            const std::string& getTitle() const { return m_title; }
+            void readBlock(uint64_t pos, uint64_t size, std::vector<unsigned char>& data);;
         private:
             void init();
             void readMetadata();
@@ -44,24 +47,24 @@ namespace cv
             std::vector<cv::Ptr<CZIScene>> m_scenes;
             std::string m_filePath;
             std::ifstream m_fileStream;
-            uint64_t m_directoryPosition;
-            uint64_t m_metadataPosition;
+            uint64_t m_directoryPosition{};
+            uint64_t m_metadataPosition{};
             // image parameters
-            int m_slideXs;
-            int m_slideYs;
-            int m_slideZs;
-            int m_slideTs;
-            int m_slideRs;
-            int m_slideIs;
-            int m_slideSs;
-            int m_slideHs;
-            int m_slideMs;
-            int m_slideBs;
-            int m_slideVs;
-            double m_magnification;
-            double m_resX;
-            double m_resY;
-            double m_resZ;
+            int m_slideXs{};
+            int m_slideYs{};
+            int m_slideZs{};
+            int m_slideTs{};
+            int m_slideRs{};
+            int m_slideIs{};
+            int m_slideSs{};
+            int m_slideHs{};
+            int m_slideMs{};
+            int m_slideBs{};
+            int m_slideVs{};
+            double m_magnification{};
+            Resolution m_res{};
+            double m_resZ{};
+            double m_resT{};
             CZIChannelInfos m_channels;
             std::string m_title;
         };

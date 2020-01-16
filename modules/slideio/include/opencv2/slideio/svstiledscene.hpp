@@ -23,7 +23,7 @@ namespace cv
             slideio::DataType getChannelDataType(int channel) const override;
             slideio::Resolution getResolution() const override;
             double getMagnification() const override;
-            cv::Rect getSceneRect() const override;
+            cv::Rect getRect() const override;
             void readResampledBlockChannels(const cv::Rect& blockRect, const cv::Size& blockSize, const std::vector<int>& channelIndices,
                 cv::OutputArray output) override;
             const slideio::TiffDirectory& findZoomDirectory(double zoom) const;
