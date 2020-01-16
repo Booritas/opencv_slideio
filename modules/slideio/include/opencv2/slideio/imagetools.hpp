@@ -22,6 +22,7 @@ namespace cv
             static int dataTypeSize(slideio::DataType dt);
             static DataType dataTypeFromGDALDataType(GDALDataType dt);
             static void readGDALImage(const std::string& path, cv::OutputArray output);
+            static void readJxrImage(const std::string& path, cv::OutputArray output);
             // jpeg 2000 related methods
             static void readJp2KFile(const std::string& path, cv::OutputArray output);
             static void decodeJp2KStream(const std::vector<uint8_t>& data, cv::OutputArray output,

@@ -6,3 +6,4 @@ libtiff/4.0.10@local/stable
 libjpeg/9c@bincrafters/stable
 openjpeg/2.3.1@local/stable
 tinyxml2/7.1.0@nicolastagliani/stable
+jxrlib/1.1.1@local/stable

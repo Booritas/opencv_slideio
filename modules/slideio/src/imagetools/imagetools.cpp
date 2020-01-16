@@ -288,6 +288,7 @@ void slideio::ImageTools::readGDALImage(const std::string& filePath, cv::OutputA
     }
 }
 
+
 void slideio::ImageTools::scaleRect(const cv::Rect& srcRect, const cv::Size& newSize, cv::Rect& trgRect)
 {
     double scaleX = static_cast<double>(newSize.width) / static_cast<double>(srcRect.width);
@@ -308,4 +309,8 @@ void slideio::ImageTools::scaleRect(const cv::Rect& srcRect, double scaleX, doub
     int dyn = static_cast<int>(std::ceil(static_cast<double>(yn)* scaleY));
     trgRect.width = dxn - trgRect.x;
     trgRect.height = dyn - trgRect.y;
+}
+
+void slideio::ImageTools::readJxrImage(const std::string& path, cv::OutputArray output)
+{
 }
