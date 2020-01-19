@@ -21,19 +21,17 @@ SVSSmallScene::SVSSmallScene(const std::string& filePath,
         m_dataType(DataType::DT_Unknown),
         m_hFile(hfile)
 {
-    m_dataType = TiffTools::dataTypeFromTIFFDataType(m_directory.dataType);
+    m_dataType = m_directory.dataType;
 
     if(m_dataType==DataType::DT_None || m_dataType==DataType::DT_Unknown)
     {
         switch(dir.bitsPerSample)
         {
             case 8:
-                m_dataType = DataType::DT_Byte;
-                m_directory.dataType = TIFF_BYTE;
+                m_dataType = m_directory.dataType = DataType::DT_Byte;
             break;
             case 16:
-                m_dataType = DataType::DT_UInt16;
-                m_directory.dataType = TIFF_SHORT;
+                m_dataType = m_directory.dataType = DataType::DT_UInt16;
             break;
             default:
                 m_dataType = DataType::DT_Unknown;

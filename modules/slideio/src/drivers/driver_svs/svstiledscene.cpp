@@ -19,19 +19,17 @@ SVSTiledScene::SVSTiledScene(const std::string& filePath,
         m_hFile(hfile)
 {
     auto& dir = m_directories[0];
-    m_dataType = TiffTools::dataTypeFromTIFFDataType(dir.dataType);
+    m_dataType = dir.dataType;
 
     if(m_dataType==DataType::DT_None || m_dataType==DataType::DT_Unknown)
     {
         switch(dir.bitsPerSample)
         {
             case 8:
-                m_dataType = DataType::DT_Byte;
-                dir.dataType = TIFF_BYTE;
+                m_dataType = dir.dataType = DataType::DT_Byte;
             break;
             case 16:
-                m_dataType = DataType::DT_UInt16;
-                dir.dataType = TIFF_SHORT;
+                m_dataType = dir.dataType = DataType::DT_UInt16;
             break;
             default:
                 m_dataType = DataType::DT_Unknown;

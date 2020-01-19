@@ -34,25 +34,22 @@ TEST(Slideio_TiffTools, scanTiffFile)
     EXPECT_TRUE(dir5.interleaved);
     EXPECT_EQ(0, dir5.res.x);
     EXPECT_EQ(0,dir5.res.y);
-    EXPECT_EQ(7,dir5.compression);
+    EXPECT_EQ((uint32_t)7,dir5.compression);
 }
 
 TEST(Slideio_TiffTools, readStripedDir)
 {
     std::string filePathTiff = TestTools::getTestImagePath("svs","CMU-1-Small-Region.svs");
     std::string filePathBmp = TestTools::getTestImagePath("svs", "CMU-1-Small-Region-page-2.bmp");
-    TIFF* tiff = TIFFOpen(filePathTiff.c_str(), "r");
+    TIFF* tiff = slideio::TiffTools::openTiffFile(filePathTiff);;
     ASSERT_TRUE(tiff!=nullptr);
     int dirIndex = 2;
-    ASSERT_TRUE(TIFFSetDirectory(tiff, dirIndex)!=0);
     slideio::TiffDirectory dir;
-    dir.dirIndex = dirIndex;
-    dir.offset = 0;
-    slideio::TiffTools::scanTiffDirTags(tiff, dir);
-    dir.dataType = TIFF_BYTE;
+    slideio::TiffTools::scanTiffDirTags(tiff, dirIndex, 0, dir);
+    dir.dataType = slideio::DataType::DT_Byte;
     cv::Mat dirRaster;
     slideio::TiffTools::readStripedDir(tiff, dir, dirRaster);
-    TIFFClose(tiff);
+    slideio::TiffTools::closeTiffFile(tiff);
     cv::Mat image;
     slideio::ImageTools::readGDALImage(filePathBmp, image);
     // compare similarity of rasters from bmp and decoded jp2k file
@@ -71,56 +68,54 @@ TEST(Slideio_TiffTools, readTile_jpeg)
     const std::string tilePath = 
         TestTools::getTestImagePath("svs","CMU-1-Small-Region-page-0-tile_5-5.bmp");
     // read tile from a tiff file
-    TIFF* tiff = TIFFOpen(filePath.c_str(), "r");
+    TIFF* tiff = slideio::TiffTools::openTiffFile(filePath);
     ASSERT_TRUE(tiff!=nullptr);
     slideio::TiffDirectory dir;
-    dir.dirIndex = 0;
-    dir.offset = 0;
-    slideio::TiffTools::scanTiffDir(tiff, dir);
-    dir.dataType = TIFF_BYTE;
+    slideio::TiffTools::scanTiffDir(tiff, 0, 0, dir);
+    dir.dataType = slideio::DataType::DT_Byte;
     int tile_sx = (dir.width-1)/dir.tileWidth + 1;
-    int tile_sy = (dir.height-1)/dir.tileHeight + 1;
     int tile = 5*tile_sx + 5;
     std::vector<int> channelIndices = {0};
     cv::Mat tileRaster;
     slideio::TiffTools::readTile(tiff, dir, tile, channelIndices, tileRaster);
-    TIFFClose(tiff);
+    slideio::TiffTools::closeTiffFile(tiff);
     // read extracted tile
-    GDALAllRegister();
-    GDALDatasetH datasetTile = GDALOpen(tilePath.c_str(), GA_ReadOnly);
-    ASSERT_TRUE(datasetTile!=nullptr);
-    GDALRasterBandH bandTile = GDALGetRasterBand(datasetTile, 1);
-    ASSERT_TRUE(bandTile!=nullptr);
-    std::vector<uint8_t> tileBuffer(dir.tileWidth*dir.tileHeight);
-    auto read = GDALRasterIO(bandTile, GF_Read, 0,0, dir.tileWidth, dir.tileHeight, tileBuffer.data(), dir.tileWidth, dir.tileHeight, GDT_Byte, 0,0);
-    ASSERT_TRUE(read==CE_None);
-    GDALClose(datasetTile);
-    // compare tiles
-    bool equal = std::equal(tileRaster.data, tileRaster.data + tileBuffer.size(), tileBuffer.begin());
+    cv::Mat bmpRaster;
+    slideio::ImageTools::readGDALImage(tilePath, bmpRaster);
+    cv::Mat bmpChannel;
+    cv::extractChannel(bmpRaster, bmpChannel, 0);
+    // compare similarity of rasters from bmp and decoded jp2k file
+    auto dataSize = bmpChannel.total() * bmpChannel.elemSize();
+    bool equal = std::equal(tileRaster.data, tileRaster.data + dataSize, bmpChannel.data);
     ASSERT_TRUE(equal);
 }
 
 TEST(Slideio_TiffTools, readTile_J2K)
 {
     const std::string filePath = 
-        TestTools::getTestImagePath("svs","JP2K-33003-1.svs");
-    const std::string tilePath = 
+        TestTools::getTestImagePath("svs","CMU-1-Small-Region.svs");
+    const std::string bmpPath = 
         TestTools::getTestImagePath("svs","CMU-1-Small-Region-page-0-tile_5-5.bmp");
     // read tile from a tiff file
-    TIFF* tiff = TIFFOpen(filePath.c_str(), "r");
+    TIFF* tiff = slideio::TiffTools::openTiffFile(filePath);
     ASSERT_TRUE(tiff!=nullptr);
     slideio::TiffDirectory dir;
-    dir.dirIndex = 0;
-    dir.offset = 0;
-    slideio::TiffTools::scanTiffDir(tiff, dir);
-    dir.dataType = TIFF_BYTE;
+    slideio::TiffTools::scanTiffDir(tiff, 0,0,dir);
+    dir.dataType = slideio::DataType::DT_Byte;
     int tile_sx = (dir.width-1)/dir.tileWidth + 1;
-    int tile_sy = (dir.height-1)/dir.tileHeight + 1;
     int tile = 5*tile_sx + 5;
     cv::Mat tileRaster;
     std::vector<int> channelIndices;
     slideio::TiffTools::readTile(tiff, dir, tile, channelIndices, tileRaster);
-    TIFFClose(tiff);
+    slideio::TiffTools::closeTiffFile(tiff);
+    cv::Mat bmpRaster;
+    slideio::ImageTools::readGDALImage(bmpPath, bmpRaster);
+    // compare similarity of rasters from bmp and decoded jp2k file
+    cv::Mat score;
+    cv::matchTemplate(tileRaster, bmpRaster, score, cv::TM_CCOEFF_NORMED);
+    double minScore(0), maxScore(0);
+    cv::minMaxLoc(score, &minScore, &maxScore);
+    ASSERT_LT(0.99, minScore);
 }
 
 }

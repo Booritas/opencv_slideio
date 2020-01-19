@@ -34,7 +34,7 @@ TEST(Slideio_TileComposer, composeRect)
     EXPECT_TRUE(whiteStddev==cv::Scalar(0, 0, 0));
     EXPECT_TRUE(blackStddev==cv::Scalar(0, 0, 0));
 
-    cv::imwrite(R"(d:\Temp\a.bmp)", image);
+    //cv::imwrite(R"(d:\Temp\a.bmp)", image);
 
 }
 }

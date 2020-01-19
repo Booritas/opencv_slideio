@@ -62,4 +62,21 @@ TEST(Slideio_ImageTools, readGDALImage)
     EXPECT_EQ(minVal,0);
     EXPECT_EQ(maxVal,0);
 }
+
+TEST(Slideio_ImageTools, readJxrImage)
+{
+    std::string pathJxr = TestTools::getTestImagePath("jxr","seagull.wdp");
+    std::string pathBmp = TestTools::getTestImagePath("jxr","seagull.bmp   ");
+    cv::Mat jxrImage, bmpImage;
+    slideio::ImageTools::readJxrImage(pathJxr, jxrImage);
+    slideio::ImageTools::readGDALImage(pathBmp, bmpImage);
+
+    namedWindow( "jxrImage", WINDOW_AUTOSIZE );
+    imshow( "jxrImage", jxrImage);
+
+    namedWindow( "bmpImage", WINDOW_AUTOSIZE );
+    imshow( "bmpImage", bmpImage);
+    waitKey(0);
+}
+
 }

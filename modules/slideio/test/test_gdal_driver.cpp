@@ -189,4 +189,5 @@ TEST(Slideio_GDALDriver, readBlockPngResampling)
     EXPECT_EQ(colorMean[2], 0);
     EXPECT_EQ(colorStddev[2], 0);
 }
+
 }

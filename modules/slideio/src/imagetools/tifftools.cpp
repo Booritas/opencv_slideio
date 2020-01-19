@@ -6,11 +6,74 @@
 #include "opencv2/slideio.hpp"
 #include "opencv2/core.hpp"
 #include <boost/format.hpp>
+#include <tiffio.h>
+#include "opencv2/slideio.hpp"
+#include <boost/filesystem.hpp>
 
 using namespace cv;
 
-void  slideio::TiffTools::scanTiffDirTags(TIFF* tiff, slideio::TiffDirectory& dir)
+
+static slideio::DataType dataTypeFromTIFFDataType(TIFFDataType dt)
 {
+    switch(dt)
+    {
+    case TIFF_NOTYPE:
+        return slideio::DataType::DT_None;
+    case TIFF_LONG8:
+    case TIFF_BYTE:
+        return slideio::DataType::DT_Byte;
+    case TIFF_ASCII:
+        return slideio::DataType::DT_None;
+    case TIFF_SHORT:
+        return slideio::DataType::DT_UInt16;
+    case TIFF_SLONG8:
+    case TIFF_SBYTE:
+        return slideio::DataType::DT_Int8;
+    case TIFF_UNDEFINED:
+        return slideio::DataType::DT_Unknown;
+    case TIFF_SSHORT:
+        return slideio::DataType::DT_Int16;
+    case TIFF_SRATIONAL:
+        return slideio::DataType::DT_Unknown;
+    case TIFF_FLOAT:
+        return slideio::DataType::DT_Float32;
+    case TIFF_DOUBLE:
+        return slideio::DataType::DT_Float64;
+    case TIFF_IFD:
+    case TIFF_RATIONAL:
+    case TIFF_IFD8:
+    default: ;
+        return slideio::DataType::DT_Unknown;
+    }
+}
+
+TIFF* slideio::TiffTools::openTiffFile(const std::string& path)
+{
+    namespace fs = boost::filesystem;
+    boost::filesystem::path filePath(path);
+    if(!fs::exists(filePath))
+    {
+        throw std::runtime_error(
+            (boost::format("File %1% does not exist") % path).str()
+        );
+    }
+    return TIFFOpen(path.c_str(), "r");
+}
+
+void slideio::TiffTools::closeTiffFile(TIFF* file)
+{
+    TIFFClose(file);
+}
+
+void  slideio::TiffTools::scanTiffDirTags(TIFF* tiff, int dirIndex, int64_t dirOffset, slideio::TiffDirectory& dir)
+{
+    TIFFSetDirectory(tiff, static_cast<short>(dirIndex));
+    if(dirOffset)
+        TIFFSetSubDirectory(tiff, dirOffset);
+
+    dir.dirIndex = dirIndex;
+    dir.offset = dirOffset;
+
     char *description(nullptr);
     short dirchnls(0), dirbits(0);
     uint16_t compress(0);
@@ -39,7 +102,7 @@ void  slideio::TiffTools::scanTiffDirTags(TIFF* tiff, slideio::TiffDirectory& di
     TIFFDataType dt(TIFF_NOTYPE);
     TIFFGetField(tiff, TIFFTAG_DATATYPE, &dt);
     dir.stripSize = (int)TIFFStripSize(tiff);
-    dir.dataType = dt;
+    dir.dataType = dataTypeFromTIFFDataType(dt);
     if(units==RESUNIT_INCH && resx>0 && resy>0){
         dir.res.x = 0.01/resx;
         dir.res.y = 0.01/resy;
@@ -68,9 +131,16 @@ void  slideio::TiffTools::scanTiffDirTags(TIFF* tiff, slideio::TiffDirectory& di
     
 }
 
-void slideio::TiffTools::scanTiffDir(TIFF* tiff, slideio::TiffDirectory& dir)
+void slideio::TiffTools::scanTiffDir(TIFF* tiff, int dirIndex, int64_t dirOffset, slideio::TiffDirectory& dir)
 {
-    scanTiffDirTags(tiff, dir);
+    TIFFSetDirectory(tiff, (short)dirIndex);
+    if(dirOffset>0)
+        TIFFSetSubDirectory(tiff, dirOffset);
+
+    dir.dirIndex = dirIndex;
+    dir.offset = dirOffset;
+
+    scanTiffDirTags(tiff, dirIndex, dirOffset, dir);
     dir.offset = 0;
     long subdirs(0);
     int64 *offsets_raw(nullptr);
@@ -85,8 +155,7 @@ void slideio::TiffTools::scanTiffDir(TIFF* tiff, slideio::TiffDirectory& dir)
         {
             if(TIFFSetSubDirectory(tiff, offsets[subdir]))
             {
-                dir.subdirectories[subdir].offset = offsets[subdir];
-                scanTiffDirTags(tiff, dir.subdirectories[subdir]);	
+                scanTiffDirTags(tiff, dirIndex, dir.subdirectories[subdir].offset, dir.subdirectories[subdir]);	
             }
         }
     }
@@ -98,9 +167,8 @@ void slideio::TiffTools::scanFile(TIFF* tiff, std::vector<TiffDirectory>& direct
     directories.resize(dirs);
     for(int dir=0; dir<dirs; dir++)
     {
-        TIFFSetDirectory(tiff,static_cast<uint16_t>(dir));
         directories[dir].dirIndex = dir;
-        scanTiffDir(tiff, directories[dir]);
+        scanTiffDir(tiff, dir, 0, directories[dir]);
     }	
 }
 
@@ -124,71 +192,15 @@ void slideio::TiffTools::scanFile(const std::string& filePath, std::vector<TiffD
         TIFFClose(file);
 }
 
-int slideio::TiffTools::dataTypeSize(TIFFDataType dt)
-{
-    switch(dt)
-    {
-    case TIFF_LONG8:
-    case TIFF_BYTE:
-    case TIFF_SBYTE:
-    case TIFF_SLONG8:
-        return 1;
-    case TIFF_SHORT:
-    case TIFF_SSHORT:
-        return 2;
-    case TIFF_LONG:
-    case TIFF_SLONG:
-        return 4;
-    case TIFF_FLOAT:
-        return 4;
-    case TIFF_DOUBLE:
-        return 8;
-    }
-    return 0;
-}
-
-slideio::DataType slideio::TiffTools::dataTypeFromTIFFDataType(TIFFDataType dt)
-{
-    switch(dt)
-    {
-    case TIFF_NOTYPE:
-        return DataType::DT_None;
-    case TIFF_LONG8:
-    case TIFF_BYTE:
-        return DataType::DT_Byte;
-    case TIFF_ASCII:
-        return DataType::DT_None;
-    case TIFF_SHORT:
-        return DataType::DT_UInt16;
-    case TIFF_SLONG8:
-    case TIFF_SBYTE:
-        return DataType::DT_Int8;
-    case TIFF_UNDEFINED:
-        return DataType::DT_Unknown;
-    case TIFF_SSHORT:
-        return DataType::DT_Int16;
-    case TIFF_SRATIONAL:
-        return DataType::DT_Unknown;
-    case TIFF_FLOAT:
-        return DataType::DT_Float32;
-    case TIFF_DOUBLE:
-        return DataType::DT_Float64;
-    case TIFF_IFD:
-    case TIFF_RATIONAL:
-    case TIFF_IFD8:
-    default: ;
-        return DataType::DT_Unknown;
-    }
-}
 
 void slideio::TiffTools::readStripedDir(TIFF* file, const slideio::TiffDirectory& dir, cv::OutputArray output)
 {
     if(!dir.interleaved)
         throw std::runtime_error("Planar striped images are not supported");
     
-    int buff_size = dir.width*dir.height*dir.channels*dataTypeSize(dir.dataType);
+    int buff_size = dir.width*dir.height*dir.channels*ImageTools::dataTypeSize(dir.dataType);
     cv::Size sizeImage = { dir.width, dir.height };
-    slideio::DataType dt = dataTypeFromTIFFDataType(dir.dataType);
+    slideio::DataType dt = dir.dataType;
     output.create(sizeImage, CV_MAKETYPE(slideio::toOpencvType(dt), dir.channels));
     cv::Mat imageRaster = output.getMat();
     TIFFSetDirectory(file, static_cast<uint16_t>(dir.dirIndex));
@@ -233,7 +245,7 @@ void slideio::TiffTools::readRegularTile(TIFF* hFile, const slideio::TiffDirecto
             const std::vector<int>& channelIndices, cv::OutputArray output)
 {
     cv::Size tileSize = { dir.tileWidth, dir.tileHeight };
-    slideio::DataType dt = dataTypeFromTIFFDataType(dir.dataType);
+    slideio::DataType dt = dir.dataType;
     cv::Mat tileRaster;
     tileRaster.create(tileSize, CV_MAKETYPE(slideio::toOpencvType(dt), dir.channels));
     TIFFSetDirectory(hFile, static_cast<uint16_t>(dir.dirIndex));

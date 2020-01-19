@@ -9,7 +9,9 @@
 
 #include <string>
 #include <vector>
-#include <tiffio.h>
+
+struct tiff;
+typedef tiff TIFF;
 
 namespace cv
 {
@@ -33,18 +35,18 @@ namespace cv
             cv::Point2d position;
             bool interleaved;
             int rowsPerStrip;
-            TIFFDataType dataType;
+            DataType dataType;
             int stripSize;
         };
         class CV_EXPORTS  TiffTools
         {
         public:
-            static void scanTiffDirTags(TIFF* tiff, slideio::TiffDirectory& dir);
-            static void scanTiffDir(TIFF* tiff, slideio::TiffDirectory& dir);
+            static TIFF* openTiffFile(const std::string& path);
+            static void closeTiffFile(TIFF* file);
+            static void scanTiffDirTags(TIFF* tiff, int dirIndex, int64_t dirOffset, slideio::TiffDirectory& dir);
+            static void scanTiffDir(TIFF* tiff, int dirIndex, int64_t dirOffset, slideio::TiffDirectory& dir);
             static void scanFile(TIFF* file, std::vector<TiffDirectory>& directories);
             static void scanFile(const std::string& filePath, std::vector<TiffDirectory>& directories);
-            static int dataTypeSize(TIFFDataType dt);
-            static slideio::DataType dataTypeFromTIFFDataType(TIFFDataType dt);
             static void readStripedDir(TIFF* file, const slideio::TiffDirectory& dir, cv::OutputArray output);
             static void readTile(TIFF* hFile, const slideio::TiffDirectory& dir, int tile,
                 const std::vector<int>& channelIndices, cv::OutputArray output);

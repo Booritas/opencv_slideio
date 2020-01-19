@@ -21,6 +21,8 @@ def configure_opencv(opencv_dir, slideio_dir, build_dir, python_dir):
     opencv_dir_param = opencv_dir.replace("\\","\\\\")
     slideio_dir_param = slideio_dir.replace("\\","/")
     cmake_props = {
+        "CMAKE_CXX_STANDARD":"17",
+        "CMAKE_CXX_STANDARD_REQUIRED":"ON",
         "OPENCV_EXTRA_MODULES_PATH":slideio_dir_param,
         "PYTHON3_LIBRARY": python_library,
         "PYTHON3_LIBRARY_DEBUG": python_library,
@@ -101,6 +103,9 @@ if __name__ == "__main__":
     python_dir = r"C:\Users\Stas\AppData\Local\conda\conda\envs\cvbuild"
     if len(sys.argv)>1:
         python_dir = sys.argv[1]
+    full_build = True
+    if len(sys.argv)>2:
+        full_build = sys.argv[2]=="True"
     root_directory = os.path.dirname(os.getcwd())
     build_directory = os.path.join(root_directory, "build")
     opencv_directory = os.path.join(root_directory, "opencv")
@@ -109,6 +114,7 @@ if __name__ == "__main__":
     print(F"Root directory: {root_directory}")
     print(F"Opencv directory: {opencv_directory}")
     print(F"Slideio directory: {slideio_directory}")
-    clean_prev_build(build_directory)
-    configure_opencv(opencv_directory, slideio_directory, build_directory, python_dir)
+    if full_build:
+        clean_prev_build(build_directory)
+        configure_opencv(opencv_directory, slideio_directory, build_directory, python_dir)
     configure_conan(slideio_directory, build_directory)
